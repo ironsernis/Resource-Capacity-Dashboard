@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eTM Roll-out Resource Dashboard</title>
+<style>
+:root{
+  --bg:#f7f8fa;--surface:#fff;--surface2:#f0f2f5;--border:#e2e5ea;--border2:#d0d4db;
+  --text:#1a1d23;--text2:#5a6172;--text3:#8c95a6;
+  --blue:#1a56db;--blue-bg:#eff4ff;--blue-border:#c3d3f7;
+  --red:#c81e1e;--red-bg:#fdf2f2;--red-border:#f8b4b4;
+  --amber:#92400e;--amber-bg:#fffbeb;--amber-border:#fcd34d;
+  --green:#057a55;--green-bg:#f3faf7;--green-border:#84e1bc;
+  --gray:#374151;--gray-bg:#f9fafb;--gray-border:#d1d5db;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.main{padding:24px 28px;overflow-x:hidden;}
+
+/* Sidebar */
+.sb-header{padding:18px 18px 14px;border-bottom:1px solid var(--border);}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:3px;}
+.logo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;}
+.sb-title{font-size:13px;font-weight:600;color:var(--text);}
+.sb-sub{font-size:11px;color:var(--text3);}
+.sb-section{padding:12px 18px 8px;}
+.sb-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.cap-box{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;}
+.cap-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.cap-lbl{font-size:11px;color:var(--blue);font-weight:500;}
+.cap-inp{width:50px;padding:2px 5px;font-size:13px;font-weight:600;border:1px solid var(--blue-border);border-radius:4px;background:#fff;color:var(--blue);text-align:center;}
+.cap-track{height:5px;background:#fff;border-radius:3px;overflow:hidden;border:1px solid var(--blue-border);}
+.cap-fill{height:100%;border-radius:3px;transition:width .3s;}
+.cap-stats{display:flex;justify-content:space-between;margin-top:5px;}
+.cap-stat{font-size:10px;}
+.roster-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;}
+.roster-item:hover{background:var(--bg);}
+.r-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.r-name{font-size:12px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.r-badge{font-size:10px;padding:1px 5px;border-radius:8px;white-space:nowrap;}
+.badge-conflict{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.badge-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.badge-gray{background:var(--gray-bg);color:var(--text3);border:1px solid var(--gray-border);}
+.add-row{display:flex;gap:6px;margin-top:8px;}
+.add-row input{flex:1;padding:4px 7px;font-size:12px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);}
+.add-row button{padding:4px 9px;font-size:12px;border-radius:5px;border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;font-weight:600;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.legend-bar{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+
+/* Main layout */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:22px;}
+.tab{padding:8px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.view{display:none;}
+.view.active{display:block;}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+.page-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.page-sub{font-size:12px;color:var(--text2);}
+.btn{padding:6px 13px;font-size:12px;border-radius:var(--radius-sm);cursor:pointer;font-weight:500;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:background .15s;}
+.btn:hover{background:var(--surface2);}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary:hover{background:#1447c0;}
+.btn-danger{background:var(--red-bg);color:var(--red);border-color:var(--red-border);}
+.btn-danger:hover{background:#fde8e8;}
+.btn-row{display:flex;gap:8px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+.stat-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.stat-val{font-size:24px;font-weight:700;line-height:1;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.alert{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:var(--radius-sm);margin-bottom:18px;font-size:12px;}
+.alert-red{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);}
+.alert.hidden{display:none;}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-ttl{font-size:15px;font-weight:600;color:var(--text);}
+
+/* Cards */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:28px;}
+.roll-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:visible;transition:box-shadow .15s;}
+.roll-card:hover{box-shadow:var(--shadow-md);}
+.roll-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:var(--radius) 0 0 var(--radius);}
+.p-critical::before{background:var(--red);}
+.p-high::before{background:#d97706;}
+.p-medium::before{background:var(--blue);}
+.p-low::before{background:var(--gray-border);}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.card-title{font-size:15px;font-weight:700;color:var(--text);}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;}
+.pill-stream{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.pill-phase{background:var(--gray-bg);color:var(--gray);border:1px solid var(--gray-border);}
+.pill-critical{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.pill-high{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.pill-medium{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);}
+.pill-low{background:var(--gray-bg);color:var(--gray);border:1px solid var(--gray-border);}
+.pill-warn{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.card-fte-block{text-align:right;flex-shrink:0;}
+.card-fte{font-size:22px;font-weight:700;line-height:1;}
+.card-fte-lbl{font-size:10px;color:var(--text3);}
+.priority-sel{font-size:11px;padding:2px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text2);cursor:pointer;margin-top:4px;}
+
+
+/* Resource list */
+.res-list-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.res-list-lbl{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+.res-list{display:flex;flex-direction:column;gap:2px;}
+
+/* Resource row — assigned */
+.res-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;border:1px solid transparent;transition:background .1s;cursor:default;}
+.res-row.assigned{background:var(--bg);border-color:var(--border);}
+.res-row.unassigned{opacity:.42;cursor:pointer;}
+.res-row.unassigned:hover{opacity:1;background:var(--bg);border-color:var(--border);}
+.res-row.conflict-row{border-color:var(--red-border)!important;background:var(--red-bg)!important;}
+.res-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.res-name{font-size:12px;font-weight:500;color:var(--text);flex:1;}
+.res-stream{font-size:10px;color:var(--text3);}
+.res-fte-val{font-size:11px;font-weight:600;min-width:34px;text-align:right;}
+.res-actions{display:flex;gap:4px;margin-left:4px;}
+.icon-btn{background:none;border:none;cursor:pointer;padding:2px 5px;border-radius:4px;font-size:12px;color:var(--text3);transition:background .1s,color .1s;}
+.icon-btn:hover{background:var(--surface2);color:var(--text);}
+.icon-btn.danger:hover{background:var(--red-bg);color:var(--red);}
+
+/* Inline week editor */
+.week-editor{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:8px;padding:10px 12px;margin-top:4px;margin-bottom:4px;}
+.week-editor-title{font-size:11px;font-weight:600;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.week-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.week-inp-wrap{display:flex;flex-direction:column;gap:2px;}
+.week-inp-lbl{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;text-align:center;}
+.week-inp{width:100%;padding:4px 6px;font-size:13px;font-weight:600;border:1px solid var(--blue-border);border-radius:5px;background:#fff;color:var(--text);text-align:center;}
+.week-inp:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue);}
+.week-inp.val-full{background:#dbeafe;color:#1e40af;}
+.week-inp.val-partial{background:#fef9c3;color:#78350f;}
+.week-editor-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end;}
+.we-btn{padding:4px 12px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600;border:1px solid var(--border2);background:var(--surface);color:var(--text2);}
+.we-btn:hover{background:var(--surface2);}
+.we-btn-save{background:var(--blue);color:#fff;border-color:var(--blue);}
+.we-btn-save:hover{background:#1447c0;}
+.we-btn-fill{background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
+
+/* Week view */
+.week-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.week-filter-lbl{font-size:12px;color:var(--text2);font-weight:500;}
+.week-filter-sel{font-size:12px;padding:4px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);}
+.week-table-wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;}
+table.wt{border-collapse:collapse;min-width:max-content;font-size:12px;}
+table.wt th,table.wt td{padding:0;border:1px solid var(--border);}
+table.wt thead th{background:var(--surface2);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:7px 10px;white-space:nowrap;position:sticky;top:0;z-index:2;}
+table.wt thead th:first-child{position:sticky;left:0;z-index:3;background:var(--surface2);}
+table.wt tbody tr:hover td{background:#f0f4ff;}
+table.wt tbody td{padding:0;vertical-align:middle;}
+table.wt tbody td:first-child{position:sticky;left:0;background:var(--surface);z-index:1;padding:0;}
+.td-resource{display:flex;align-items:center;gap:8px;padding:7px 10px;min-width:170px;}
+.td-rollout-cell{background:var(--surface2)!important;}
+.cell-wrap{display:flex;align-items:center;justify-content:center;height:38px;min-width:68px;}
+.cell-full{background:#dbeafe;color:#1e40af;font-weight:600;font-size:12px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.cell-partial{background:#fef9c3;color:#78350f;font-weight:600;font-size:12px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.cell-none{color:var(--border2);font-size:11px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.cell-conflict{background:#fde8e8!important;outline:2px solid var(--red);outline-offset:-2px;}
+.week-group-hdr td{background:var(--surface2);font-weight:700;font-size:11px;color:var(--text);padding:6px 10px;border-top:2px solid var(--border2);}
+
+/* Inline editable cell input */
+.cell-inp{width:100%;height:100%;border:none;background:transparent;text-align:center;font-size:12px;font-weight:600;cursor:pointer;padding:0 4px;color:inherit;}
+.cell-inp:focus{outline:2px solid var(--blue);outline-offset:-2px;border-radius:3px;background:#fff;color:var(--text);cursor:text;}
+.cell-wrap:focus-within{outline:2px solid var(--blue);outline-offset:-2px;border-radius:3px;}
+
+/* Stream filter toggles */
+.stream-toggles{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.stream-btn{padding:4px 12px;font-size:11px;font-weight:600;border-radius:20px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:background .12s,color .12s,border-color .12s;}
+.stream-btn:hover{background:var(--surface2);color:var(--text);}
+.stream-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.stream-btn.st-TM.active{background:#1a56db;border-color:#1a56db;}
+.stream-btn.st-CS.active{background:#057a55;border-color:#057a55;}
+.stream-btn.st-SCI.active{background:#5521b5;border-color:#5521b5;}
+.stream-btn.st-PM.active{background:#92400e;border-color:#92400e;}
+
+
+/* ── Multi-select filter ── */
+.ms-filter-wrap{position:relative;display:inline-block;}
+.ms-trigger{padding:5px 12px;font-size:12px;font-weight:500;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.ms-trigger:hover{background:var(--surface2);}
+.ms-trigger.active{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+.ms-count{font-size:11px;font-weight:600;background:var(--blue);color:#fff;border-radius:10px;padding:1px 7px;min-width:20px;text-align:center;}
+.ms-trigger:not(.active) .ms-count{background:var(--border2);color:var(--text2);}
+.ms-dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:210px;max-height:300px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:var(--shadow-md);z-index:100;display:flex;flex-direction:column;}
+.ms-dropdown.hidden{display:none;}
+.ms-search-wrap{padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ms-search{width:100%;padding:5px 8px;font-size:12px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);outline:none;}
+.ms-search:focus{border-color:var(--blue);}
+.ms-options{overflow-y:auto;flex:1;max-height:220px;padding:4px 0;}
+.ms-item{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background .1s;}
+.ms-item:hover{background:var(--blue-bg);}
+.ms-item input[type=checkbox]{accent-color:var(--blue);width:14px;height:14px;cursor:pointer;flex-shrink:0;}
+.ms-item.hidden{display:none;}
+.ms-clear-btn{padding:5px 10px;font-size:11px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--text3);cursor:pointer;}
+.ms-clear-btn:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-border);}
+
+/* Cost view */
+.cost-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px;}
+.cost-card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.cost-total-val{font-size:20px;font-weight:700;color:var(--blue);}
+table.ct{width:100%;border-collapse:collapse;font-size:12px;}
+table.ct th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);padding:5px 10px;border-bottom:1px solid var(--border);text-align:left;}
+table.ct th:not(:first-child){text-align:right;}
+table.ct td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
+table.ct td:not(:first-child){text-align:right;}
+table.ct tr:last-child td{border-bottom:none;}
+table.ct tr.ct-total td{font-weight:700;color:var(--text);background:var(--surface2);border-top:2px solid var(--border2);}
+.rate-inp-wrap{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;}
+.rate-inp-name{font-size:12px;font-weight:500;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rate-inp{width:80px;padding:3px 7px;font-size:12px;font-weight:600;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--blue);text-align:right;}
+.cost-grand{background:linear-gradient(135deg,#1a56db,#3b82f6);border-radius:var(--radius);padding:18px 22px;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.cost-grand-label{font-size:13px;opacity:.85;}
+.cost-grand-val{font-size:28px;font-weight:700;}
+
+/* Settings view */
+.cfg-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow);}
+.cfg-section-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.cfg-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em;}
+.cfg-sub{font-size:12px;color:var(--text3);}
+.cfg-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.cfg-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;}
+.cfg-item-label{font-size:13px;font-weight:500;color:var(--text);flex:1;}
+.cfg-item-sub{font-size:11px;color:var(--text3);margin-left:4px;}
+.cfg-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);font-weight:500;}
+.cfg-del-btn{padding:3px 8px;font-size:11px;border-radius:5px;border:1px solid var(--red-border);background:var(--red-bg);color:var(--red);cursor:pointer;margin-left:auto;}
+.cfg-del-btn:hover{background:#fde8e8;}
+.cfg-add-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px dashed var(--border);}
+.cfg-inp{padding:6px 10px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);}
+.cfg-sel{padding:6px 8px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);}
+.cfg-add-btn{padding:6px 14px;font-size:12px;font-weight:600;border-radius:6px;border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;white-space:nowrap;}
+.cfg-add-btn:hover{background:#1447c0;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@media(max-width:800px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .cards-grid{grid-template-columns:1fr;}
+  .main{padding:14px;}
+  .week-inputs{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-header" style="padding:20px 18px 18px;text-align:center;background:linear-gradient(160deg,#0f1c3f 0%,#1a3a6b 100%);">
+    <!-- Horizon lighthouse icon -->
+    <div style="display:flex;justify-content:center;margin-bottom:10px;">
+      <svg width="48" height="56" viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- glow arcs -->
+        <path d="M24 20 L6 4" stroke="#f0c060" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+        <path d="M24 20 L0 16" stroke="#f0c060" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+        <path d="M24 20 L42 4" stroke="#f0c060" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+        <path d="M24 20 L48 16" stroke="#f0c060" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+        <path d="M24 20 L14 2" stroke="#f0c060" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6"/>
+        <path d="M24 20 L34 2" stroke="#f0c060" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6"/>
+        <path d="M24 20 L24 0" stroke="#f0c060" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.7"/>
+        <!-- light glow circle -->
+        <circle cx="24" cy="20" r="4" fill="#fde68a" opacity="0.25"/>
+        <!-- lantern room -->
+        <rect x="19" y="15" width="10" height="8" rx="1" fill="#fde68a" opacity="0.9"/>
+        <rect x="20" y="16" width="8" height="6" rx="0.5" fill="#fbbf24"/>
+        <!-- tower -->
+        <path d="M21 23 L20 46 L28 46 L27 23 Z" fill="#e2e8f0"/>
+        <!-- tower stripes -->
+        <path d="M21 28 L27 28 L27 29.5 L21 29.5Z" fill="#94a3b8" opacity="0.5"/>
+        <path d="M20.5 34 L27.5 34 L27.5 35.5 L20.5 35.5Z" fill="#94a3b8" opacity="0.5"/>
+        <path d="M20.2 40 L27.8 40 L27.8 41.5 L20.2 41.5Z" fill="#94a3b8" opacity="0.5"/>
+        <!-- door -->
+        <path d="M22 40 Q24 38 26 40 L26 46 L22 46Z" fill="#1e3a5f"/>
+        <!-- base -->
+        <rect x="17" y="46" width="14" height="4" rx="1" fill="#cbd5e1"/>
+        <!-- water line -->
+        <path d="M8 52 Q16 50 24 52 Q32 54 40 52" stroke="#7dd3fc" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <path d="M4 54 Q14 52 24 54 Q34 56 44 54" stroke="#7dd3fc" stroke-width="1" fill="none" opacity="0.4"/>
+      </svg>
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:17px;font-weight:600;color:#f8fafc;letter-spacing:0.12em;line-height:1.2;">Horizon</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:300;color:#94a3b8;letter-spacing:0.18em;font-style:italic;margin-top:2px;">&amp; Beyond</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Team capacity</div>
+    <div class="cap-box">
+      <div class="cap-top">
+        <span class="cap-lbl">Team size (auto)</span>
+        <input class="cap-inp" type="number" id="total-cap" value="27" min="1" max="50" step="1" readonly style="background:#e8f0fe;cursor:default;" title="Auto-calculated from your roster">
+      </div>
+      <div class="cap-track"><div class="cap-fill" id="cap-bar" style="width:0%;background:var(--blue)"></div></div>
+      <div class="cap-stats">
+        <span class="cap-stat" id="cap-alloc-txt" style="color:var(--blue)">0.0 allocated</span>
+        <span class="cap-stat" id="cap-rem-txt" style="color:var(--text3)">14.0 free</span>
+      </div>
+    </div>
+  </div>
+  <div class="sb-section" style="flex:1;overflow-y:auto;">
+    <div class="sb-label">Team roster</div>
+    <div id="roster-list"></div>
+    <div style="margin-top:10px;">
+      <button onclick="document.querySelector('.tab:last-child').click()" style="width:100%;padding:7px;font-size:12px;border-radius:6px;border:1px dashed var(--blue-border);background:var(--blue-bg);color:var(--blue);cursor:pointer;font-weight:500;">
+        ⚙ Configure team &amp; roll-outs
+      </button>
+    </div>
+  </div>
+  <div style="padding:14px 18px;border-top:1px solid var(--border);">
+    <div class="sb-label">Legend</div>
+    <div class="legend-item"><div class="legend-bar" style="background:#dbeafe"></div>Full (1.0 FTE)</div>
+    <div class="legend-item"><div class="legend-bar" style="background:#fef9c3"></div>Partial (&lt;1.0 FTE)</div>
+    <div class="legend-item"><div class="legend-bar" style="background:var(--red-bg);border:1px solid var(--red-border)"></div>Conflict</div>
+    <div class="legend-item"><div class="legend-bar" style="background:var(--surface2);border:1px solid var(--border)"></div>Not assigned</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+    <!-- Left: title + date -->
+    <div style="flex:0 0 auto;">
+      <div class="page-title" style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;letter-spacing:0.04em;white-space:nowrap;">Resource allocation dashboard</div>
+      <div class="page-sub" style="margin-top:2px;"><span id="last-updated"></span></div>
+    </div>
+    <!-- Centre: both logos -->
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:20px;">
+      <!-- Horizon lighthouse + wordmark -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="34" height="40" viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 20 L6 4"  stroke="#d97706" stroke-width="1"   stroke-dasharray="2 3" opacity="0.5"/>
+          <path d="M24 20 L42 4" stroke="#d97706" stroke-width="1"   stroke-dasharray="2 3" opacity="0.5"/>
+          <path d="M24 20 L14 2" stroke="#d97706" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.65"/>
+          <path d="M24 20 L34 2" stroke="#d97706" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.65"/>
+          <path d="M24 20 L24 0" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.85"/>
+          <circle cx="24" cy="20" r="4" fill="#fde68a" opacity="0.3"/>
+          <rect x="19" y="15" width="10" height="8" rx="1" fill="#fde68a" opacity="0.9"/>
+          <rect x="20" y="16" width="8"  height="6" rx="0.5" fill="#f59e0b"/>
+          <path d="M21 23 L20 46 L28 46 L27 23 Z" fill="#334155"/>
+          <path d="M21 28 L27 28 L27 29.5 L21 29.5Z" fill="#64748b" opacity="0.6"/>
+          <path d="M20.5 34 L27.5 34 L27.5 35.5 L20.5 35.5Z" fill="#64748b" opacity="0.6"/>
+          <path d="M20.2 40 L27.8 40 L27.8 41.5 L20.2 41.5Z" fill="#64748b" opacity="0.6"/>
+          <path d="M22 40 Q24 38 26 40 L26 46 L22 46Z" fill="#0f172a"/>
+          <rect x="17" y="46" width="14" height="4" rx="1" fill="#475569"/>
+          <path d="M8 52 Q16 50 24 52 Q32 54 40 52" stroke="#38bdf8" stroke-width="1.5" fill="none" opacity="0.7"/>
+        </svg>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:#0f172a;letter-spacing:0.12em;line-height:1.1;">HORIZON</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:300;color:#64748b;letter-spacing:0.16em;font-style:italic;">&amp; Beyond</div>
+        </div>
+      </div>
+      <!-- divider -->
+      <div style="width:1px;height:38px;background:#dde1e7;flex-shrink:0;"></div>
+      <!-- Sanofi logo -->
+      <img id="sanofi-logo" alt="Sanofi" style="height:44px;object-fit:contain;flex-shrink:0;">
+    </div>
+    <!-- Right: action buttons -->
+    <div class="btn-row" style="flex:0 0 auto;">
+      <span id="last-saved-lbl" style="font-size:11px;color:var(--text3);margin-right:6px;align-self:center;">No saved session</span>
+      <button class="btn" onclick="clearAutoSave()" title="Clear saved session" style="font-size:11px;padding:5px 10px;color:var(--text3);">🗑</button>
+      <button class="btn" onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-primary" onclick="saveState()">Save snapshot</button>
+    </div>
+  </div>
+
+  <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+    <div class="stat-card"><div class="stat-lbl">Total capacity</div><div class="stat-val" id="s-total" style="color:var(--blue)">—</div><div class="stat-sub">people in team</div></div>
+    <div class="stat-card"><div class="stat-lbl">On bench this week</div><div class="stat-val" id="s-rem" style="color:var(--green)">—</div><div class="stat-sub">no assignment this week</div></div>
+    <div class="stat-card"><div class="stat-lbl">Overloaded resources</div><div class="stat-val" id="s-multi" style="color:var(--green)">—</div><div class="stat-sub">weekly FTE &gt; 1.0</div></div>
+  </div>
+
+  <div id="conflict-banner" class="alert alert-red hidden">⚠ <strong id="conflict-text"></strong></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('roll-out-view',this)">Roll-out view</div>
+    <div class="tab" onclick="switchTab('week-view',this)">Week view</div>
+    <div class="tab" onclick="switchTab('cost-view',this)">💰 Cost estimate</div>
+    <div class="tab" onclick="switchTab('roadmap-view',this)">🗺 Roadmap</div>
+    <div class="tab" onclick="switchTab('settings-view',this)">⚙ Settings</div>
+  </div>
+
+  <div id="roll-out-view" class="view active">
+    <div class="section-hdr" style="flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div class="section-ttl">Roll-out tracks</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto;">
+        <!-- Multi-select filter dropdowns -->
+        <div class="ms-filter-wrap" id="f-rollout-wrap">
+          <button class="ms-trigger" onclick="toggleDropdown('f-rollout')">
+            Roll-out <span class="ms-count" id="f-rollout-count">All</span> ▾
+          </button>
+          <div class="ms-dropdown hidden" id="f-rollout">
+            <div class="ms-search-wrap"><input class="ms-search" type="text" placeholder="Search…" oninput="msSearch('f-rollout',this.value)"></div>
+            <div class="ms-options" id="f-rollout-opts">
+              <label class="ms-item"><input type="checkbox" value="__all" checked onchange="msSelectAll('f-rollout',this)"> All roll-outs</label>
+            </div>
+          </div>
+        </div>
+        <div class="ms-filter-wrap" id="f-resource-wrap">
+          <button class="ms-trigger" onclick="toggleDropdown('f-resource')">
+            Resource <span class="ms-count" id="f-resource-count">All</span> ▾
+          </button>
+          <div class="ms-dropdown hidden" id="f-resource">
+            <div class="ms-search-wrap"><input class="ms-search" type="text" placeholder="Search…" oninput="msSearch('f-resource',this.value)"></div>
+            <div class="ms-options" id="f-resource-opts">
+              <label class="ms-item"><input type="checkbox" value="__all" checked onchange="msSelectAll('f-resource',this)"> All resources</label>
+            </div>
+          </div>
+        </div>
+        <div class="ms-filter-wrap" id="f-stream-wrap">
+          <button class="ms-trigger" onclick="toggleDropdown('f-stream')">
+            Stream <span class="ms-count" id="f-stream-count">All</span> ▾
+          </button>
+          <div class="ms-dropdown hidden" id="f-stream">
+            <div class="ms-search-wrap"><input class="ms-search" type="text" placeholder="Search…" oninput="msSearch('f-stream',this.value)"></div>
+            <div class="ms-options" id="f-stream-opts">
+              <label class="ms-item"><input type="checkbox" value="__all" checked onchange="msSelectAll('f-stream',this)"> All streams</label>
+            </div>
+          </div>
+        </div>
+        <button class="ms-clear-btn" onclick="clearAllFilters()">✕ Clear filters</button>
+        <span style="font-size:11px;color:var(--text3);margin-left:4px;">✏ edit weeks &nbsp;·&nbsp; ✕ remove</span>
+      </div>
+    </div>
+    <div class="cards-grid" id="cards"></div>
+  </div>
+
+  <div id="week-view" class="view">
+    <div class="week-toolbar">
+      <div class="ms-filter-wrap" id="wf-rollout-wrap">
+        <button class="ms-trigger" onclick="toggleDropdown('wf-rollout')">
+          Roll-out <span class="ms-count" id="wf-rollout-count">All</span> ▾
+        </button>
+        <div class="ms-dropdown hidden" id="wf-rollout">
+          <div class="ms-search-wrap"><input class="ms-search" type="text" placeholder="Search…" oninput="msSearch('wf-rollout',this.value)"></div>
+          <div class="ms-options" id="wf-rollout-opts">
+            <label class="ms-item"><input type="checkbox" value="__all" checked onchange="msSelectAll('wf-rollout',this)"> All roll-outs</label>
+          </div>
+        </div>
+      </div>
+      <div class="ms-filter-wrap" id="wf-resource-wrap">
+        <button class="ms-trigger" onclick="toggleDropdown('wf-resource')">
+          Resource <span class="ms-count" id="wf-resource-count">All</span> ▾
+        </button>
+        <div class="ms-dropdown hidden" id="wf-resource">
+          <div class="ms-search-wrap"><input class="ms-search" type="text" placeholder="Search…" oninput="msSearch('wf-resource',this.value)"></div>
+          <div class="ms-options" id="wf-resource-opts">
+            <label class="ms-item"><input type="checkbox" value="__all" checked onchange="msSelectAll('wf-resource',this)"> All resources</label>
+          </div>
+        </div>
+      </div>
+      <div class="ms-filter-wrap" id="wf-stream-wrap">
+        <button class="ms-trigger" onclick="toggleDropdown('wf-stream')">
+          Stream <span class="ms-count" id="wf-stream-count">All</span> ▾
+        </button>
+        <div class="ms-dropdown hidden" id="wf-stream">
+          <div class="ms-search-wrap"><input class="ms-search" type="text" placeholder="Search…" oninput="msSearch('wf-stream',this.value)"></div>
+          <div class="ms-options" id="wf-stream-opts">
+            <label class="ms-item"><input type="checkbox" value="__all" checked onchange="msSelectAll('wf-stream',this)"> All streams</label>
+          </div>
+        </div>
+      </div>
+      <button class="ms-clear-btn" onclick="clearWeekFilters()">✕ Clear filters</button>
+    </div>
+    <div class="week-table-wrap" id="week-table-wrap"></div>
+  </div>
+
+  <!-- ══ ROADMAP VIEW ══ -->
+  <div id="roadmap-view" class="view">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+      <div style="font-size:15px;font-weight:600;color:var(--text);">Project roadmap</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text2);">Drag phase bars to shift dates &nbsp;·&nbsp; Click a phase to edit</span>
+      </div>
+    </div>
+    <div id="roadmap-wrap" style="overflow-x:auto;"></div>
+  </div>
+
+  <!-- ══ COST VIEW ══ -->
+  <div id="cost-view" class="view">
+
+    <!-- Controls bar -->
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+      <div style="font-size:15px;font-weight:600;color:var(--text);">Cost estimate</div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <label style="font-size:12px;color:var(--text2);font-weight:500;">Months</label>
+        <input id="cost-months" type="number" min="1" max="36" value="6" step="1"
+          style="width:64px;padding:4px 8px;font-size:13px;font-weight:600;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);text-align:center;"
+          oninput="renderCostView()">
+        <span style="font-size:11px;color:var(--text3);">× FTE × daily rate × 20 days</span>
+        <button class="btn" onclick="exportCostCSV()">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Daily rate table -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:22px;box-shadow:var(--shadow);">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;">Daily rates per resource</div>
+      <div id="rate-table" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;"></div>
+    </div>
+
+    <!-- Cost summary by roll-out -->
+    <div id="cost-summary"></div>
+
+  </div>
+  <!-- ══ SETTINGS VIEW ══ -->
+  <div id="settings-view" class="view">
+    <div style="max-width:860px;">
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:20px;">Dashboard configuration</div>
+
+      <!-- ── Roll-outs ── -->
+      <div class="cfg-section">
+        <div class="cfg-section-hdr">
+          <div>
+            <div class="cfg-title">Roll-outs</div>
+            <div class="cfg-sub">Add or remove roll-out tracks shown across all views</div>
+          </div>
+        </div>
+        <div id="cfg-rollout-list" class="cfg-list"></div>
+        <div class="cfg-add-row">
+          <input id="cfg-ro-key" type="text" placeholder="Key (e.g. fkt)" class="cfg-inp" style="width:110px;">
+          <input id="cfg-ro-label" type="text" placeholder="Label (e.g. FKT)" class="cfg-inp" style="width:110px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <label style="font-size:11px;color:var(--text3);">Colour</label>
+            <input type="color" id="cfg-ro-colour" value="#1a56db" style="width:32px;height:30px;padding:0;border:1px solid var(--border2);border-radius:4px;cursor:pointer;">
+          </div>
+          <button class="cfg-add-btn" onclick="cfgAddRollout()">+ Add roll-out</button>
+        </div>
+      </div>
+
+      <!-- ── Resources ── -->
+      <div class="cfg-section">
+        <div class="cfg-section-hdr">
+          <div>
+            <div class="cfg-title">Resources</div>
+            <div class="cfg-sub">Add team members and assign their stream</div>
+          </div>
+        </div>
+        <div id="cfg-resource-list" class="cfg-list"></div>
+        <div class="cfg-add-row">
+          <input id="cfg-res-name" type="text" placeholder="Name" class="cfg-inp" style="width:160px;" onkeydown="if(event.key==='Enter')cfgAddResource()">
+          <select id="cfg-res-stream" class="cfg-sel" style="width:90px;"></select>
+          <input id="cfg-res-rate" type="number" placeholder="Daily rate €" class="cfg-inp" style="width:120px;" min="0" step="50">
+          <button class="cfg-add-btn" onclick="cfgAddResource()">+ Add resource</button>
+        </div>
+      </div>
+
+      <!-- ── Streams ── -->
+      <div class="cfg-section">
+        <div class="cfg-section-hdr">
+          <div>
+            <div class="cfg-title">Streams</div>
+            <div class="cfg-sub">Define the work streams available across the team</div>
+          </div>
+        </div>
+        <div id="cfg-stream-list" class="cfg-list"></div>
+        <div class="cfg-add-row">
+          <input id="cfg-stream-name" type="text" placeholder="Stream name (e.g. ABAP)" class="cfg-inp" style="width:200px;" onkeydown="if(event.key==='Enter')cfgAddStream()">
+          <button class="cfg-add-btn" onclick="cfgAddStream()">+ Add stream</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const PRIORITY={
+  critical:{label:'Critical',pillClass:'pill-critical',barColor:'#c81e1e',fteColor:'#c81e1e'},
+  high:    {label:'High',    pillClass:'pill-high',    barColor:'#d97706',fteColor:'#92400e'},
+  medium:  {label:'Medium',  pillClass:'pill-medium',  barColor:'#1a56db',fteColor:'#1a56db'},
+  low:     {label:'Low',     pillClass:'pill-low',     barColor:'#9ca3af',fteColor:'#6b7280'}
+};
+const AV_COLORS=[
+  {bg:'#dbeafe',c:'#1e40af'},{bg:'#d1fae5',c:'#065f46'},
+  {bg:'#ede9fe',c:'#4c1d95'},{bg:'#fef3c7',c:'#78350f'},
+  {bg:'#fce7f3',c:'#831843'},{bg:'#dcfce7',c:'#14532d'},
+  {bg:'#ffedd5',c:'#7c2d12'},{bg:'#f1f5f9',c:'#334155'},
+  {bg:'#e0f2fe',c:'#0c4a6e'},{bg:'#fdf4ff',c:'#581c87'},
+  {bg:'#f0fdf4',c:'#166534'},{bg:'#fff7ed',c:'#9a3412'}
+];
+const rollouts=[{"key": "alpina", "label": "Alpina", "stream": "TM", "colour": "#0d9488"}, {"key": "bud", "label": "BUD", "stream": "TM", "colour": "#ea580c"}, {"key": "cry", "label": "CRY", "stream": "TM", "colour": "#c81e1e"}, {"key": "de", "label": "FKT Greenfield", "stream": "TM", "colour": "#d97706"}, {"key": "fr_retrofit", "label": "FR Retrofit", "stream": "TM", "colour": "#057a55"}, {"key": "fr_vdr", "label": "FR VdR", "stream": "TM", "colour": "#1a56db"}, {"key": "sing", "label": "SING", "stream": "TM", "colour": "#0891b2"}, {"key": "sme", "label": "SME", "stream": "TM", "colour": "#64748b"}, {"key": "us", "label": "US", "stream": "TM", "colour": "#9333ea"}];
+const WEEKS=["15-Jun", "22-Jun", "29-Jun", "6-Jul", "13-Jul", "20-Jul", "27-Jul", "3-Aug", "10-Aug", "17-Aug", "24-Aug", "31-Aug", "7-Sep", "14-Sep", "21-Sep", "28-Sep", "5-Oct", "12-Oct", "19-Oct", "26-Oct", "2-Nov", "9-Nov", "16-Nov", "23-Nov", "30-Nov", "7-Dec", "14-Dec", "21-Dec", "28-Dec", "4-Jan", "11-Jan", "18-Jan", "25-Jan", "1-Feb", "8-Feb", "15-Feb", "22-Feb", "1-Mar", "8-Mar", "15-Mar", "22-Mar", "29-Mar", "5-Apr", "12-Apr", "19-Apr", "26-Apr", "3-May"];
+
+const weekData = {
+  'alpina': {
+    'Abhishek': [null, null, null, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Kuldeep': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null],
+    'Kalpikaa': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  'bud': {
+    'Siva': [1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  'cry': {
+    'Shilpi': [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Abhishek': [1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Ullas': [1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Nejib': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Manish P': [null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Sena': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Manish S': [null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Bayrem': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Imane': [0.6, 0.6, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Syrine': [1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Khadija': [1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  'de': {
+    'Nejib': [0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Abhishek': [null, null, null, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, null],
+    'Ullas': [null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null],
+    'Kumar G': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Manish S': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null],
+    'Ashok': [null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Sena': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Ines': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null],
+    'Imane': [0.4, 0.4, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null],
+    'Khawla': [null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null],
+    'Idris': [null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null],
+  },
+  'fr_retrofit': {
+    'Ullas': [null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Krishna': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Kumar G': [null, null, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Jarek': [null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  'fr_vdr': {
+    'Nejib': [0.5, 0.5, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Khawla': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Kumar G': [1.0, 1.0, 0.5, 0.5, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Rahul S': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Julien': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Emilie': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Nesrine': [1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Manish S': [1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Manish P': [1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  'sing': {
+    'Manish P': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    'Rahul S': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    'Abhishek': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, null, null, null, null, null, null],
+    'Kumar G': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    'Manish S': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    'Ashok': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    'Khawla': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0],
+    'Imane': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0],
+    'Ines': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0],
+    'Shilpi': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    'Sena': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  },
+  'sme': {
+    'Andrey': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+  'us': {
+    'Manos': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Ashok': [1.0, 1.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Manish P': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+    'Nesrine': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  },
+};
+
+
+const roadmapData = {"fr_vdr": [{"phase": "Hypercare", "start": "15-Jun-2026", "end": "22-Jun-2026"}, {"phase": "Hypercare ext", "start": "13-Jul-2026", "end": "20-Jul-2026"}], "cry": [{"phase": "UAT", "start": "8-Jun-2026", "end": "13-Jul-2026"}, {"phase": "Cutover", "start": "13-Jul-2026", "end": "24-Aug-2026"}, {"phase": "Hypercare", "start": "24-Aug-2026", "end": "5-Oct-2026"}], "de": [{"phase": "TA", "start": "8-Jun-2026", "end": "15-Jun-2026"}, {"phase": "D&B", "start": "15-Jun-2026", "end": "3-Aug-2026"}, {"phase": "BUILD", "start": "3-Aug-2026", "end": "12-Oct-2026"}, {"phase": "SIT PREP", "start": "12-Oct-2026", "end": "2-Nov-2026"}, {"phase": "SIT", "start": "2-Nov-2026", "end": "4-Jan-2027"}, {"phase": "UAT PREP", "start": "4-Jan-2027", "end": "18-Jan-2027"}, {"phase": "UAT", "start": "18-Jan-2027", "end": "8-Mar-2027"}, {"phase": "Cutover", "start": "8-Mar-2027", "end": "22-Mar-2027"}, {"phase": "Hypercare", "start": "5-Apr-2027", "end": "12-Apr-2027"}], "sing": [{"phase": "FIT GAP", "start": "7-Sep-2026", "end": "12-Oct-2026"}, {"phase": "SIT PREP", "start": "4-Jan-2027", "end": "18-Jan-2027"}, {"phase": "TA", "start": "18-Jan-2027", "end": "25-Jan-2027"}, {"phase": "D&B", "start": "25-Jan-2027", "end": "8-Mar-2027"}, {"phase": "UAT", "start": "8-Mar-2027", "end": "12-Apr-2027"}, {"phase": "Cutover", "start": "12-Apr-2027", "end": "19-Apr-2027"}], "dxb": [{"phase": "FIT GAP", "start": "16-Nov-2026", "end": "28-Dec-2026"}, {"phase": "TA", "start": "4-Jan-2027", "end": "18-Jan-2027"}, {"phase": "D&B", "start": "18-Jan-2027", "end": "15-Mar-2027"}, {"phase": "SIT PREP", "start": "15-Mar-2027", "end": "29-Mar-2027"}]};
+
+const PHASE_COLORS = {
+  'Build':'#3b82f6','SIT PREP':'#8b5cf6','SIT':'#f59e0b',
+  'UAT':'#10b981','UAT PREP':'#34d399','SIT/UAT Prep':'#6ee7b7',
+  'Cut Over':'#ef4444','Cutover':'#ef4444','RT/CutOver':'#ef4444',
+  'UAT/RT/Cut':'#f97316','Hypercare':'#06b6d4','TR':'#a78bfa',
+  'FIT GAP':'#60a5fa','TA':'#8b5cf6','D&B':'#f59e0b',
+  'RETESTING Upgrade':'#f97316','BUILD':'#3b82f6',
+  'BUILD/SIT Prep':'#6366f1','Backlog':'#9ca3af'
+};
+
+/* ── AUTO-CLEAR: wipe only weeks fully before the current week on each load ── */
+(function wipePastWeeks(){
+  const today = new Date();
+  // Find start of current week (Monday)
+  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon...
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const currentWeekStart = new Date(today);
+  currentWeekStart.setDate(today.getDate() - daysToMonday);
+  currentWeekStart.setHours(0,0,0,0);
+
+  const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  WEEKS.forEach((lbl, i) => {
+    const parts = lbl.split('-');
+    const day = parseInt(parts[0]);
+    const month = months[parts[1]];
+    for(const y of [2026,2027,2028]){
+      const weekStart = new Date(y, month, day);
+      const weekEnd   = new Date(weekStart.getTime() + 7*24*60*60*1000);
+      // Only wipe if week ended BEFORE the current week started
+      if(weekEnd <= currentWeekStart){
+        Object.values(weekData).forEach(proj=>{
+          Object.keys(proj).forEach(name=>{
+            if(proj[name][i] != null) proj[name][i] = null;
+          });
+        });
+        break;
+      }
+      if(weekStart >= currentWeekStart) break; // current or future week, stop
+    }
+  });
+})();
+
+
+/* stream lookup */
+const memberStreams = {"Shilpi": "TM", "Siva": "OneTM", "Manos": "OneTM", "Ashok": "TM", "Nejib": "TM", "Abhishek": "TM", "Manish P": "TM", "Ullas": "TM", "Khawla": "TM", "Sena": "TM", "Kumar G": "TM", "Manish S": "TM", "Rahul S": "TM", "Bayrem": "TM", "Ines": "TM", "Nesrine": "CS", "Julien": "CS", "Andrey": "CS", "Imane": "TM", "Krishna": "TM", "Idris": "TM", "Emilie": "SCI", "Syrine": "TM", "Khadija": "TM", "Jarek": "PM", "Kuldeep": "TM", "Kalpikaa": "TM"};  // name → stream, populated from rollout stream or manually set
+
+function getStream(rollout,name){
+  // Check manual override first
+  if(memberStreams[name]) return memberStreams[name];
+  // Fall back to rollout stream
+  const ro = rollouts.find(r=>r.key===rollout);
+  return ro ? ro.stream : 'TM';
+}
+
+function avgWeeks(vals){
+  const nonNull=vals.filter(v=>v!=null);
+  return nonNull.length?parseFloat((nonNull.reduce((s,v)=>s+v,0)/nonNull.length).toFixed(2)):0;
+}
+
+/* derive members from weekData */
+const seedNames=[...new Set(Object.values(weekData).flatMap(r=>Object.keys(r)))].sort();
+let members=seedNames.map((name,i)=>({name,id:'m'+i}));
+
+function getMember(name){return members.find(m=>m.name===name);}
+function getMemberIdx(name){return members.findIndex(m=>m.name===name);}
+function avColor(name){const i=Math.abs(getMemberIdx(name))%AV_COLORS.length;return AV_COLORS[i];}
+function initials(name){return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+
+/* state */
+const state={};
+rollouts.forEach(r=>{
+  const names=Object.keys(weekData[r.key]||{});
+  const total=parseFloat(names.reduce((s,n)=>s+avgWeeks((weekData[r.key]||{})[n]||[]),0).toFixed(1));
+  const ids=[...new Set(names.map(n=>{const m=getMember(n);return m?m.id:null;}).filter(Boolean))];
+  state[r.key]={fte:total,priority:'medium',members:ids};
+});
+
+/* track which editor is open: {rollKey, memberId} */
+let openEditor=null;
+
+/* stream filter now handled by multi-select */
+
+function getOverloaded(){
+  const conflicted=new Set();
+  members.forEach(m=>{
+    WEEKS.forEach((_,i)=>{
+      const weekTotal=rollouts.reduce((sum,r)=>{
+        const vals=(weekData[r.key]||{})[m.name]||[];
+        return sum+(vals[i]!=null&&vals[i]>0?vals[i]:0);
+      },0);
+      if(weekTotal>1.0) conflicted.add(m.name);
+    });
+  });
+  return [...conflicted];
+}
+
+function recomputeCardFte(rollKey){
+  const names=state[rollKey].members.map(id=>members.find(m=>m.id===id)?.name).filter(Boolean);
+  const total=names.reduce((s,name)=>{
+    const vals=(weekData[rollKey]||{})[name];
+    return s+(vals?avgWeeks(vals):0);
+  },0);
+  state[rollKey].fte=parseFloat(total.toFixed(1));
+}
+
+/* ── ROSTER ── */
+function renderRoster(){
+  const el=document.getElementById('roster-list');
+  const ov=getOverloaded();
+  // Find first week with data for bench check
+  let benchWeekIdx=0;
+  for(let i=0;i<WEEKS.length;i++){
+    const hasData=rollouts.some(r=>Object.values(weekData[r.key]||{}).some(vals=>vals[i]!=null&&vals[i]>0));
+    if(hasData){benchWeekIdx=i;break;}
+  }
+  el.innerHTML='';
+  members.forEach(m=>{
+    const isOver=ov.includes(m.name);
+    const cnt=rollouts.filter(r=>state[r.key]&&state[r.key].members.includes(m.id)).length;
+    // Bench: no FTE in current week across any roll-out
+    const weekTotal=rollouts.reduce((s,r)=>{
+      const v=(weekData[r.key]||{})[m.name]?.[benchWeekIdx];
+      return s+(v!=null&&v>0?v:0);
+    },0);
+    const isOnBench=weekTotal===0;
+    const c=avColor(m.name);
+    const d=document.createElement('div');
+    d.className='roster-item';
+    d.style.cssText=isOnBench?'background:var(--red-bg);border-radius:6px;':'';
+    d.innerHTML=`<div class="r-dot" style="background:${isOnBench?'var(--red)':c.c}"></div>
+      <span class="r-name" title="${m.name}" style="color:${isOnBench?'var(--red)':'var(--text)'}">${m.name}${isOnBench?' <span style=\"font-size:9px;color:var(--red);\">● bench</span>':''}</span>
+      ${cnt>0?`<span class="r-badge ${isOver?'badge-conflict':'badge-ok'}">${cnt}×</span>`:`<span class="r-badge badge-gray">—</span>`}`;
+    el.appendChild(d);
+  });
+}
+
+/* ── INLINE WEEK EDITOR ── */
+function buildWeekEditor(rollKey, memberId){
+  const m=members.find(x=>x.id===memberId);
+  if(!m) return '';
+  if(!weekData[rollKey]) weekData[rollKey]={};
+  const vals=weekData[rollKey][m.name]||[null,null,null,null,null,null];
+  const inputsHtml=WEEKS.map((w,i)=>{
+    const v=vals[i];
+    const cls=v==null?'':v>=1?'val-full':'val-partial';
+    return `<div class="week-inp-wrap">
+      <div class="week-inp-lbl">${w}</div>
+      <input class="week-inp ${cls}" type="number" id="we-${rollKey}-${memberId}-${i}"
+        min="0" max="1" step="0.1" value="${v!=null?v:''}" placeholder="—"
+        oninput="colorWeekInp(this)">
+    </div>`;
+  }).join('');
+  return `<div class="week-editor" id="we-panel-${rollKey}-${memberId}">
+    <div class="week-editor-title">
+      <span>✏ Weekly dedication — ${m.name}</span>
+      <button class="icon-btn" onclick="closeEditor()" title="Close">✕</button>
+    </div>
+    <div class="week-inputs">${inputsHtml}</div>
+    <div class="week-editor-actions">
+      <button class="we-btn we-btn-fill" onclick="fillAllWeeks('${rollKey}','${memberId}',1)">Fill 1.0</button>
+      <button class="we-btn we-btn-fill" onclick="fillAllWeeks('${rollKey}','${memberId}',0.5)">Fill 0.5</button>
+      <button class="we-btn we-btn-fill" onclick="fillAllWeeks('${rollKey}','${memberId}',null)">Clear</button>
+      <button class="we-btn we-btn-save" onclick="saveWeeks('${rollKey}','${memberId}')">Save</button>
+    </div>
+  </div>`;
+}
+
+function colorWeekInp(inp){
+  const v=parseFloat(inp.value);
+  inp.className='week-inp'+(isNaN(v)?'':v>=1?' val-full':' val-partial');
+}
+
+function fillAllWeeks(rollKey,memberId,val){
+  WEEKS.forEach((_,i)=>{
+    const inp=document.getElementById(`we-${rollKey}-${memberId}-${i}`);
+    if(!inp) return;
+    inp.value=val!=null?val:'';
+    inp.className='week-inp'+(val==null?'':val>=1?' val-full':' val-partial');
+  });
+}
+
+function saveWeeks(rollKey,memberId){
+  const m=members.find(x=>x.id===memberId);
+  if(!m) return;
+  const vals=WEEKS.map((_,i)=>{
+    const inp=document.getElementById(`we-${rollKey}-${memberId}-${i}`);
+    if(!inp||inp.value==='') return null;
+    return parseFloat(parseFloat(inp.value).toFixed(2));
+  });
+  if(!weekData[rollKey]) weekData[rollKey]={};
+  weekData[rollKey][m.name]=vals;
+  recomputeCardFte(rollKey);
+  openEditor=null;
+  renderCards(); renderRoster(); update(true);
+  if(document.getElementById('week-view').classList.contains('active')) renderWeekView();
+}
+
+function closeEditor(){
+  openEditor=null;
+  renderCards();
+}
+
+function openWeekEditor(rollKey,memberId){
+  openEditor=(openEditor&&openEditor.rollKey===rollKey&&openEditor.memberId===memberId)?null:{rollKey,memberId};
+  renderCards();
+}
+
+function assignMember(rollKey,memberId){
+  if(!state[rollKey].members.includes(memberId)){
+    state[rollKey].members.push(memberId);
+    /* init blank week data */
+    const m=members.find(x=>x.id===memberId);
+    if(m){
+      if(!weekData[rollKey]) weekData[rollKey]={};
+      if(!weekData[rollKey][m.name]) weekData[rollKey][m.name]=Array(WEEKS.length).fill(null);
+    }
+    /* immediately open editor for the new resource */
+    openEditor={rollKey,memberId};
+  }
+  renderCards(); renderRoster(); update(true);
+}
+
+function unassignMember(rollKey,memberId){
+  state[rollKey].members=state[rollKey].members.filter(id=>id!==memberId);
+  const m=members.find(x=>x.id===memberId);
+  if(m&&weekData[rollKey]) delete weekData[rollKey][m.name];
+  recomputeCardFte(rollKey);
+  if(openEditor&&openEditor.rollKey===rollKey&&openEditor.memberId===memberId) openEditor=null;
+  renderCards(); renderRoster(); update(true);
+  if(document.getElementById('week-view').classList.contains('active')) renderWeekView();
+}
+
+/* ── CARDS ── */
+function renderCards(){
+  const container=document.getElementById('cards');
+  container.innerHTML='';
+  const cap=members.length||1;
+  document.getElementById('total-cap').value=cap;
+  const ov=getOverloaded();
+  const selRollouts=getSelected('f-rollout');
+  const visRollouts=rollouts.filter(r=>!selRollouts.length||selRollouts.includes(r.key));
+
+  visRollouts.forEach(r=>{
+    if(!state[r.key]) return;
+    const s=state[r.key];
+    const p=PRIORITY[s.priority]||PRIORITY['medium'];
+    const cardColour=r.colour||p.barColor;
+    const conflicts=s.members.filter(id=>ov.includes(members.find(m=>m.id===id)?.name)).length;
+
+    /* assigned rows */
+    const assignedRows=s.members.map(id=>{
+      const m=members.find(x=>x.id===id);
+      if(!m) return '';
+      const vals=(weekData[r.key]||{})[m.name]||[];
+      const avg=avgWeeks(vals);
+      const stream=getStream(r.key,m.name);
+      const selStreams=getSelected('f-stream');
+      const selResources=getSelected('f-resource');
+      if(selStreams.length&&!selStreams.includes(stream)) return '';
+      if(selResources.length&&!selResources.includes(m.name)) return '';
+      const isConf=ov.includes(m.name);
+      const c=avColor(m.name);
+      const isEditing=openEditor&&openEditor.rollKey===r.key&&openEditor.memberId===id;
+      const editorHtml=isEditing?buildWeekEditor(r.key,id):'';
+      return `<div>
+        <div class="res-row assigned${isConf?' conflict-row':''}" style="${isEditing?'border-color:var(--blue);background:var(--blue-bg);':''}">
+          <div class="res-avatar" style="background:${c.bg};color:${c.c}">${initials(m.name)}</div>
+          <span class="res-name">${m.name}</span>
+          <span class="res-stream">${stream}</span>
+          <span class="res-fte-val" style="color:${avg>=1?'var(--blue)':avg>0?'var(--amber)':'var(--text3)'}">${avg>0?avg.toFixed(2):'—'}</span>
+          <div class="res-actions">
+            <button class="icon-btn" title="Edit weekly dedication" onclick="openWeekEditor('${r.key}','${id}')">✏</button>
+            <button class="icon-btn danger" title="Unassign" onclick="unassignMember('${r.key}','${id}')">✕</button>
+          </div>
+          ${isConf?`<span style="font-size:10px;color:var(--red);margin-left:2px">⚠</span>`:''}
+        </div>
+        ${editorHtml}
+      </div>`;
+    }).join('');
+
+    /* unassigned */
+    const unassigned=members.filter(m=>!s.members.includes(m.id));
+    const unassignedRows=unassigned
+      .filter(m=>{ const st=getStream(r.key,m.name); const selS=getSelected('f-stream'); const selR=getSelected('f-resource'); if(selS.length&&!selS.includes(st)) return false; if(selR.length&&!selR.includes(m.name)) return false; return true; })
+      .map(m=>{
+      const c=avColor(m.name);
+      return `<div class="res-row unassigned" onclick="assignMember('${r.key}','${m.id}')">
+        <div class="res-avatar" style="background:${c.bg};color:${c.c}">${initials(m.name)}</div>
+        <span class="res-name" style="color:var(--text3)">${m.name}</span>
+        <span style="font-size:10px;color:var(--text3);margin-left:auto">+ assign</span>
+      </div>`;
+    }).join('');
+
+    const div=document.createElement('div');
+    div.className='roll-card';
+    div.style.borderLeft=`4px solid ${cardColour}`;
+    div.style.borderRadius='0 var(--radius) var(--radius) 0';
+    div.innerHTML=`
+      <div class="card-top">
+        <div style="flex:1;min-width:0;">
+          <div class="card-title">${r.label}</div>
+          ${conflicts>0?`<div style="margin-top:5px;"><span class="pill pill-warn">⚠ ${conflicts} resource${conflicts>1?'s':''} overloaded this week</span></div>`:''}
+        </div>
+        <div class="card-fte-block">
+          <div class="card-fte" style="color:${cardColour}" id="fte-${r.key}">${s.fte.toFixed(1)}</div>
+          <div class="card-fte-lbl">FTE total</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;"></div>
+      <div class="res-list-hdr">
+        <span class="res-list-lbl">${s.members.length} assigned</span>
+        <span style="font-size:10px;color:var(--text3)">✏ edit weeks &nbsp; ✕ remove</span>
+      </div>
+      <div class="res-list">${assignedRows}</div>
+      ${unassigned.length?`<details style="margin-top:8px;">
+        <summary style="font-size:11px;color:var(--text3);cursor:pointer;list-style:none;display:flex;align-items:center;gap:5px;">
+          <span>▸</span>${unassigned.length} unassigned — click to add
+        </summary>
+        <div class="res-list" style="margin-top:6px;">${unassignedRows}</div>
+      </details>`:''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ── WEEK VIEW ── */
+function populateFilters(){
+  const roSorted  = [...rollouts].sort((a,b)=>a.label.localeCompare(b.label));
+  const memSorted = [...members].sort((a,b)=>a.name.localeCompare(b.name));
+  const stSorted  = [...streams].sort((a,b)=>a.localeCompare(b));
+
+  function fill(optsId, items, valFn, labelFn, ddId){
+    const opts = document.getElementById(optsId);
+    if(!opts) return;
+    opts.querySelectorAll('label:not(:first-child)').forEach(l=>l.remove());
+    items.forEach(item=>{
+      const lbl = document.createElement('label');
+      lbl.className = 'ms-item';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.value = valFn(item); cb.checked = true;
+      cb.addEventListener('change', ()=>msChanged(ddId));
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(' '+labelFn(item)));
+      opts.appendChild(lbl);
+    });
+  }
+
+  fill('f-rollout-opts',  roSorted,  r=>r.key,  r=>r.label, 'f-rollout');
+  fill('wf-rollout-opts', roSorted,  r=>r.key,  r=>r.label, 'wf-rollout');
+  fill('f-resource-opts', memSorted, m=>m.name, m=>m.name,  'f-resource');
+  fill('wf-resource-opts',memSorted, m=>m.name, m=>m.name,  'wf-resource');
+  fill('f-stream-opts',   stSorted,  s=>s,      s=>s,       'f-stream');
+  fill('wf-stream-opts',  stSorted,  s=>s,      s=>s,       'wf-stream');
+}
+
+function toggleDropdown(id){
+  const dd = document.getElementById(id);
+  const wasHidden = dd.classList.contains('hidden');
+  document.querySelectorAll('.ms-dropdown').forEach(d=>{
+    d.classList.add('hidden');
+    const s=d.querySelector('.ms-search');
+    if(s){ s.value=''; msSearch(d.id,''); }
+  });
+  if(wasHidden){
+    dd.classList.remove('hidden');
+    const s=dd.querySelector('.ms-search');
+    if(s) setTimeout(()=>s.focus(),60);
+  }
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ms-filter-wrap')){
+    document.querySelectorAll('.ms-dropdown').forEach(d=>{
+      d.classList.add('hidden');
+      const s=d.querySelector('.ms-search');
+      if(s){ s.value=''; msSearch(d.id,''); }
+    });
+  }
+});
+
+function msSearch(ddId, query){
+  const opts = document.getElementById(ddId+'-opts');
+  if(!opts) return;
+  const q = query.toLowerCase().trim();
+  opts.querySelectorAll('label:not(:first-child)').forEach(lbl=>{
+    lbl.style.display = (q && !lbl.textContent.toLowerCase().includes(q)) ? 'none' : '';
+  });
+}
+
+function msSelectAll(id, cb){
+  const opts = document.getElementById(id+'-opts');
+  if(!opts) return;
+  opts.querySelectorAll('label').forEach(lbl=>{
+    if(lbl.style.display!=='none'){
+      const c=lbl.querySelector('input'); if(c) c.checked=cb.checked;
+    }
+  });
+  _syncAll(id); _updateBtn(id); applyFilters();
+}
+
+function msChanged(id){
+  _syncAll(id); _updateBtn(id); applyFilters();
+}
+
+function _syncAll(id){
+  const opts=document.getElementById(id+'-opts');
+  if(!opts) return;
+  const allCb=opts.querySelector('input[value="__all"]');
+  const others=[...opts.querySelectorAll('input[type=checkbox]:not([value="__all"])')];
+  if(allCb) allCb.checked=others.every(c=>c.checked);
+}
+
+function _updateBtn(id){
+  const opts=document.getElementById(id+'-opts');
+  const dd=document.getElementById(id);
+  if(!opts||!dd) return;
+  const others=[...opts.querySelectorAll('input[type=checkbox]:not([value="__all"])')];
+  const checked=others.filter(c=>c.checked);
+  const isAll=checked.length===0||checked.length===others.length;
+  const btn=dd.closest('.ms-filter-wrap').querySelector('.ms-trigger');
+  const count=btn.querySelector('.ms-count');
+  btn.classList.toggle('active',!isAll);
+  count.textContent=isAll?'All':checked.length;
+}
+
+function getSelected(id){
+  const opts=document.getElementById(id+'-opts');
+  if(!opts) return [];
+  const others=[...opts.querySelectorAll('input[type=checkbox]:not([value="__all"])')];
+  const checked=others.filter(c=>c.checked).map(c=>c.value);
+  return (checked.length===0||checked.length===others.length)?[]:checked;
+}
+
+function clearAllFilters(){
+  ['f-rollout','f-resource','f-stream'].forEach(id=>{
+    const opts=document.getElementById(id+'-opts');
+    if(!opts) return;
+    opts.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=true);
+    opts.querySelectorAll('label').forEach(l=>l.style.display='');
+    const srch=document.getElementById(id)?.querySelector('.ms-search');
+    if(srch) srch.value='';
+    _updateBtn(id);
+  });
+  applyFilters();
+}
+
+function clearWeekFilters(){
+  ['wf-rollout','wf-resource','wf-stream'].forEach(id=>{
+    const opts=document.getElementById(id+'-opts');
+    if(!opts) return;
+    opts.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=true);
+    opts.querySelectorAll('label').forEach(l=>l.style.display='');
+    const srch=document.getElementById(id)?.querySelector('.ms-search');
+    if(srch) srch.value='';
+    _updateBtn(id);
+  });
+  renderWeekView();
+}
+
+function switchTab(viewId,tabEl){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  tabEl.classList.add('active');
+  if(viewId==='week-view') renderWeekView();
+  if(viewId==='cost-view'){ renderRateTable(); renderCostView(); }
+  if(viewId==='roadmap-view') renderRoadmap();
+  if(viewId==='settings-view') renderSettings();
+}
+
+function applyFilters(){
+  const weekActive=document.getElementById('week-view').classList.contains('active');
+  if(weekActive) renderWeekView();
+  else renderCards();
+}
+
+/* legacy compat */
+function populateWeekFilters(){ populateFilters(); }
+
+function renderWeekView(){
+  const selWRollouts=getSelected('wf-rollout');
+  const selWResources=getSelected('wf-resource');
+  const selWStreams=getSelected('wf-stream');
+  const ov=getOverloaded();
+  const visRollouts=rollouts.filter(r=>!selWRollouts.length||selWRollouts.includes(r.key));
+
+  const wrap=document.getElementById('week-table-wrap');
+  wrap.innerHTML='';
+
+  const table=document.createElement('table');
+  table.className='wt';
+
+  // thead
+  const thead=document.createElement('thead');
+  const hrow=document.createElement('tr');
+  const th0=document.createElement('th');
+  th0.style.minWidth='180px';
+  th0.textContent='Resource';
+  hrow.appendChild(th0);
+  WEEKS.forEach(w=>{
+    const th=document.createElement('th');
+    th.style.cssText='min-width:68px;text-align:center;';
+    th.textContent=w;
+    hrow.appendChild(th);
+  });
+  const thAvg=document.createElement('th');
+  thAvg.style.cssText='min-width:58px;text-align:center;';
+  thAvg.textContent='Avg';
+  hrow.appendChild(thAvg);
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+  let rowCount=0;
+
+  visRollouts.forEach(r=>{
+    const rd=weekData[r.key]||{};
+    const names=Object.keys(rd).filter(n=>{
+      if(selWResources.length&&!selWResources.includes(n)) return false;
+      if(selWStreams.length&&!selWStreams.includes(getStream(r.key,n))) return false;
+      return true;
+    });
+    if(!names.length) return;
+
+    // group header row
+    const ghr=document.createElement('tr');
+    ghr.className='week-group-hdr';
+    const ghTd=document.createElement('td');
+    ghTd.colSpan=WEEKS.length+2;
+    ghTd.style.padding='6px 10px';
+    ghTd.innerHTML=`<span style="font-weight:700;color:var(--text)">${r.label}</span>`;
+    ghr.appendChild(ghTd);
+    tbody.appendChild(ghr);
+
+    names.forEach(name=>{
+      const vals=rd[name]||[];
+      const stream=getStream(r.key,name);
+      const isConf=ov.includes(name);
+      const c=avColor(name);
+      const avg=avgWeeks(vals);
+      const weekTotals=WEEKS.map((_,i)=>rollouts.reduce((s,ro)=>{
+        const v=(weekData[ro.key]||{})[name]?.[i];
+        return s+(v!=null&&v>0?v:0);
+      },0));
+
+      const tr=document.createElement('tr');
+
+      // resource cell
+      const tdRes=document.createElement('td');
+      tdRes.className=isConf?'td-rollout-cell':'';
+      tdRes.innerHTML=`<div class="td-resource">
+        <div class="res-avatar" style="background:${c.bg};color:${c.c};width:24px;height:24px;font-size:9px">${initials(name)}</div>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:${isConf?'var(--red)':'var(--text)'}">${name}${isConf?' ⚠':''}</div>
+          <div style="font-size:10px;color:var(--text3)">${stream}</div>
+        </div>
+      </div>`;
+      tr.appendChild(tdRes);
+
+      // week cells
+      WEEKS.forEach((_,i)=>{
+        const v=vals[i];
+        const thisWeekOver=weekTotals[i]>1.0;
+        const isC=thisWeekOver&&v!=null&&v>0;
+        const dispVal=v!=null?v.toFixed(2):'';
+        const cellCls=v==null?'cell-none':v>=1?`cell-full${isC?' cell-conflict':''}`:`cell-partial${isC?' cell-conflict':''}`;
+
+        const td=document.createElement('td');
+        const cw=document.createElement('div');
+        cw.className=`cell-wrap ${cellCls}`;
+        cw.id=`cw-${r.key}-${name.replace(/\s/g,'_')}-${i}`;
+
+        const inp=document.createElement('input');
+        inp.type='number'; inp.min='0'; inp.max='2'; inp.step='0.1';
+        inp.className='cell-inp';
+        inp.value=dispVal; inp.placeholder='—';
+        inp.title=isC?`⚠ Total FTE ${WEEKS[i]}: ${weekTotals[i].toFixed(2)} > 1.0`:`${name} · ${WEEKS[i]}`;
+        inp.onchange=()=>updateWeekCell(r.key,name,i,inp.value);
+        inp.oninput=()=>styleWeekCell(inp);
+        inp.onfocus=()=>inp.select();
+        cw.appendChild(inp);
+        td.appendChild(cw);
+        tr.appendChild(td);
+      });
+
+      // avg cell
+      const tdAvg=document.createElement('td');
+      const avgWrap=document.createElement('div');
+      avgWrap.className='cell-wrap';
+      avgWrap.style.background='var(--surface2)';
+      const avgSpan=document.createElement('span');
+      avgSpan.id=`avg-${r.key}-${name.replace(/\s/g,'_')}`;
+      avgSpan.style.cssText='font-size:12px;font-weight:600;color:var(--text2)';
+      avgSpan.textContent=avg.toFixed(2);
+      avgWrap.appendChild(avgSpan);
+      tdAvg.appendChild(avgWrap);
+      tr.appendChild(tdAvg);
+
+      tbody.appendChild(tr);
+      rowCount++;
+    });
+  });
+
+  // totals row
+  if(!selWRollouts.length&&!selWResources.length){
+    const ttr=document.createElement('tr');
+    ttr.style.borderTop='2px solid var(--border2)';
+    const ttd=document.createElement('td');
+    ttd.innerHTML=`<div class="td-resource"><span style="font-size:12px;font-weight:700;color:var(--text)">Total FTE</span></div>`;
+    ttr.appendChild(ttd);
+    WEEKS.forEach((_,i)=>{
+      const tot=rollouts.reduce((sum,r)=>sum+Object.values(weekData[r.key]||{}).reduce((s,v)=>s+(v[i]!=null?v[i]:0),0),0);
+      const td=document.createElement('td');
+      td.innerHTML=`<div class="cell-wrap" style="background:var(--surface2)"><span style="font-size:12px;font-weight:700;color:var(--blue)">${tot.toFixed(1)}</span></div>`;
+      ttr.appendChild(td);
+    });
+    const tavg=document.createElement('td');
+    ttr.appendChild(tavg);
+    tbody.appendChild(ttr);
+  }
+
+  table.appendChild(tbody);
+
+  if(rowCount===0){
+    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;">No data matches the current filters.</div>';
+  } else {
+    wrap.appendChild(table);
+  }
+}
+
+/* ── WEEK VIEW INLINE EDITING ── */
+function styleWeekCell(inp){
+  const v=parseFloat(inp.value);
+  const wrap=inp.closest('.cell-wrap');
+  if(!wrap) return;
+  wrap.className='cell-wrap '+(inp.value===''?'cell-none':v>=1?'cell-full':'cell-partial');
+}
+
+function updateWeekCell(rollKey,name,weekIdx,rawVal){
+  // 1. Save the new value
+  const v=rawVal===''?null:parseFloat(parseFloat(rawVal).toFixed(2));
+  if(!weekData[rollKey]) weekData[rollKey]={};
+  if(!weekData[rollKey][name]) weekData[rollKey][name]=Array(WEEKS.length).fill(null);
+  weekData[rollKey][name][weekIdx]=v;
+
+  // 2. Update avg cell for this roll-out row
+  const vals=weekData[rollKey][name];
+  const avg=avgWeeks(vals);
+  const avgEl=document.getElementById(`avg-${rollKey}-${name.replace(/\s/g,'_')}`);
+  if(avgEl) avgEl.textContent=avg.toFixed(2);
+
+  // 3. Capacity evaluation — compute week total across ALL roll-outs for this person
+  const weekTotal=rollouts.reduce((s,r)=>{
+    const wv=(weekData[r.key]||{})[name]?.[weekIdx];
+    return s+(wv!=null&&wv>0?wv:0);
+  },0);
+  const weekIsOver=weekTotal>1.0;
+
+  // 4. Refresh ALL cells for this person on this week index, across every roll-out row visible
+  rollouts.forEach(r=>{
+    const cellVal=(weekData[r.key]||{})[name]?.[weekIdx];
+    const cwId=`cw-${r.key}-${name.replace(/\s/g,'_')}-${weekIdx}`;
+    const cw=document.getElementById(cwId);
+    if(!cw) return;
+    const isC=weekIsOver&&cellVal!=null&&cellVal>0;
+    cw.className='cell-wrap '+(cellVal==null?'cell-none':cellVal>=1?`cell-full${isC?' cell-conflict':''}`:`cell-partial${isC?' cell-conflict':''}`);
+    const inp=cw.querySelector('input');
+    if(inp) inp.title=isC?`⚠ Total FTE week of ${WEEKS[weekIdx]}: ${weekTotal.toFixed(2)} — exceeds 1.0`:`${name} · ${WEEKS[weekIdx]}`;
+  });
+
+  // 5. Refresh the resource name cell (⚠ icon + red colour) for this person across all visible roll-out groups
+  const newOv=getOverloaded();
+  const isStillConf=newOv.includes(name);
+  rollouts.forEach(r=>{
+    // find the td-resource div for this person in this roll-out group
+    const cwFirst=document.getElementById(`cw-${r.key}-${name.replace(/\s/g,'_')}-0`);
+    if(!cwFirst) return;
+    const row=cwFirst.closest('tr');
+    if(!row) return;
+    const firstTd=row.querySelector('td:first-child');
+    if(!firstTd) return;
+    firstTd.className=isStillConf?'td-rollout-cell':'';
+    const nameDiv=firstTd.querySelector('div[style*="font-size:12px"]');
+    if(nameDiv){
+      nameDiv.style.color=isStillConf?'var(--red)':'var(--text)';
+      nameDiv.textContent=name+(isStillConf?' ⚠':'');
+    }
+  });
+
+  // 6. Recompute card FTE, roster badges, summary stats + banner
+  recomputeCardFte(rollKey);
+  renderRoster();
+  update(true);
+  autoSave();
+}
+
+
+
+function setPriority(rollKey,val){state[rollKey].priority=val;renderCards();}
+
+/* ── STREAMS ── */
+let streams = ['TM','CS','SCI','PM'];
+
+function populateStreamSelects(){
+  // Sidebar new-member stream dropdown
+  const sel = document.getElementById('new-stream');
+  if(sel){
+    const cur = sel.value;
+    sel.innerHTML = streams.map(s=>`<option value="${s}"${s===cur?' selected':''}>${s}</option>`).join('');
+  }
+  // Week view stream filter
+  ['f-stream-opts','wf-stream-opts'].forEach(optsId=>{
+    const opts=document.getElementById(optsId);
+    if(!opts) return;
+    const ddId=optsId.replace('-opts','');
+    opts.querySelectorAll('label:not(:first-child)').forEach(l=>l.remove());
+    const sorted=[...streams].sort((a,b)=>a.localeCompare(b));
+    sorted.forEach(s=>{
+      const lbl=document.createElement('label');
+      lbl.className='ms-item';
+      lbl.innerHTML=`<input type="checkbox" value="${s}" checked onchange="msChanged('${ddId}')"> ${s}`;
+      opts.appendChild(lbl);
+    });
+  });
+  // Also update the stream-btn toggles in roll-out view header
+  const toggleWrap = document.getElementById('stream-toggles');
+  if(toggleWrap){
+    // Remove old stream buttons (keep "All")
+    toggleWrap.querySelectorAll('.stream-btn:not([data-stream="all"])').forEach(b=>b.remove());
+    streams.forEach(s=>{
+      const btn = document.createElement('button');
+      btn.className = `stream-btn st-${s}`;
+      btn.dataset.stream = s;
+      btn.textContent = s;
+      btn.onclick = ()=>setStreamFilter(s);
+      toggleWrap.appendChild(btn);
+    });
+  }
+}
+
+function addStream(){
+  const inp = document.getElementById('new-stream-name');
+  const name = inp.value.trim().toUpperCase();
+  if(!name) return;
+  if(streams.includes(name)){ inp.value=''; return; }
+  streams.push(name);
+  inp.value='';
+  populateStreamSelects();
+  // Add CSS colour for new stream toggle button dynamically
+  const style = document.createElement('style');
+  const hue = Math.floor(Math.random()*360);
+  style.textContent = `.stream-btn.st-${name}.active{background:hsl(${hue},60%,40%);border-color:hsl(${hue},60%,40%);}`;
+  document.head.appendChild(style);
+}
+
+function addMember(){
+  const inp = document.getElementById('new-name');
+  const streamSel = document.getElementById('new-stream');
+  const name = inp.value.trim();
+  if(!name) return;
+  const stream = streamSel ? streamSel.value : 'TM';
+  memberStreams[name] = stream;
+  members.push({name, id:'m'+Date.now()});
+  inp.value='';
+  populateFilters();
+  renderRoster(); renderCards();
+}
+
+function update(skipRender){
+  if(!skipRender){renderCards();renderRoster();}
+  const cap=members.length||1;
+  document.getElementById('total-cap').value=cap;
+
+  document.getElementById('s-total').textContent=cap;
+  // Find the first week index that has any data across all roll-outs
+  let currentWeekIdx=0;
+  for(let i=0;i<WEEKS.length;i++){
+    const hasData=rollouts.some(r=>
+      Object.values(weekData[r.key]||{}).some(vals=>vals[i]!=null&&vals[i]>0)
+    );
+    if(hasData){ currentWeekIdx=i; break; }
+  }
+  // Bench = people with 0 FTE in the current week across all roll-outs
+  // Includes people with no weekData entries at all (newly added)
+  const bench=members.filter(m=>{
+    const total=rollouts.reduce((s,r)=>{
+      const v=(weekData[r.key]||{})[m.name]?.[currentWeekIdx];
+      return s+(v!=null&&v>0?v:0);
+    },0);
+    return total===0;
+  }).length;
+  const re=document.getElementById('s-rem');
+  re.textContent=bench;
+  re.style.color=bench>0?'var(--amber)':'var(--green)';
+  document.getElementById('cap-bar').style.cssText=`width:0%;background:var(--blue)`;
+  document.getElementById('cap-alloc-txt').textContent=cap+' people';
+  document.getElementById('cap-rem-txt').textContent='';
+  const ov=getOverloaded();
+  document.getElementById('s-multi').textContent=ov.length;
+  document.getElementById('s-multi').style.color=ov.length>0?'var(--red)':'var(--green)';
+  const banner=document.getElementById('conflict-banner');
+  if(ov.length>0){
+    banner.classList.remove('hidden');
+    // build detail per person: which weeks are over 1.0
+    const details=ov.map(name=>{
+      const overWeeks=WEEKS.filter((_,i)=>{
+        const tot=rollouts.reduce((s,r)=>{const v=(weekData[r.key]||{})[name]?.[i];return s+(v!=null&&v>0?v:0);},0);
+        return tot>1.0;
+      });
+      return `${name} (${overWeeks.join(', ')})`;
+    }).join(' · ');
+    document.getElementById('conflict-text').textContent=`Weekly FTE > 1.0: ${details}`;
+  }
+  else banner.classList.add('hidden');
+  // Auto-save on every update
+  autoSave();
+}
+const STORAGE_KEY = 'etm_dashboard_autosave';
+
+function autoSave(){
+  try {
+    const snap = {
+      savedAt:       new Date().toISOString(),
+      weekData:      weekData,
+      rollouts:      rollouts,
+      members:       members,
+      memberStreams:  memberStreams,
+      dailyRates:    dailyRates,
+      streams:       streams,
+      state:         Object.fromEntries(
+        Object.entries(state).map(([k,v])=>([k,{
+          fte:      v.fte,
+          priority: v.priority,
+          members:  v.members.map(id=>members.find(m=>m.id===id)?.name).filter(Boolean)
+        }]))
+      )
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
+    // Update last-saved indicator
+    const el = document.getElementById('last-saved-lbl');
+    if(el) el.textContent = '💾 Saved ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  } catch(e){
+    console.warn('Auto-save failed:', e);
+  }
+}
+
+function autoRestore(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const snap = JSON.parse(raw);
+
+    // Restore rollouts
+    if(snap.rollouts && snap.rollouts.length){
+      rollouts.length = 0;
+      snap.rollouts.forEach(r=>rollouts.push(r));
+    }
+    // Restore weekData
+    if(snap.weekData){
+      Object.keys(weekData).forEach(k=>delete weekData[k]);
+      Object.entries(snap.weekData).forEach(([k,v])=>weekData[k]=v);
+    }
+    // Restore streams
+    if(snap.streams && snap.streams.length){
+      streams.length = 0;
+      snap.streams.forEach(s=>streams.push(s));
+    }
+    // Restore memberStreams and dailyRates
+    if(snap.memberStreams) Object.assign(memberStreams, snap.memberStreams);
+    if(snap.dailyRates)    Object.assign(dailyRates, snap.dailyRates);
+    // Restore members (add any not already in seedNames-derived list)
+    if(snap.members && snap.members.length){
+      members.length = 0;
+      snap.members.forEach(m=>members.push(m));
+    }
+    // Restore state assignments
+    if(snap.state){
+      Object.entries(snap.state).forEach(([key,v])=>{
+        if(!state[key]) state[key]={fte:0,priority:'medium',members:[]};
+        state[key].fte      = v.fte||0;
+        state[key].priority = v.priority||'medium';
+        state[key].members  = (v.members||[]).map(name=>members.find(m=>m.name===name)?.id).filter(Boolean);
+      });
+    }
+    // Show restore notice
+    const el = document.getElementById('last-saved-lbl');
+    const savedAt = snap.savedAt ? new Date(snap.savedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+    if(el) el.textContent = '✅ Restored from ' + savedAt;
+    return true;
+  } catch(e){
+    console.warn('Auto-restore failed:', e);
+    return false;
+  }
+}
+
+function clearAutoSave(){
+  if(!confirm('Clear saved session? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  const el = document.getElementById('last-saved-lbl');
+  if(el) el.textContent = 'No saved session';
+  alert('Cleared. Reload the page to start fresh.');
+}
+/* ══ END AUTO-SAVE ══ */
+
+function saveState(){
+  const snap={date:new Date().toISOString(),capacity:document.getElementById('total-cap').value,weekData,rollouts:{}};
+  rollouts.forEach(r=>{snap.rollouts[r.key]={fte:state[r.key].fte,priority:state[r.key].priority,members:state[r.key].members.map(id=>members.find(m=>m.id===id)?.name)};});
+  const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='etm_snapshot_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+
+function exportCSV(){
+  let csv='Roll-out,Stream,Phase,FTE,Priority,Resources\n';
+  rollouts.forEach(r=>{
+    const names=state[r.key].members.map(id=>members.find(m=>m.id===id)?.name).join(' | ');
+    csv+=`${r.label},${r.stream},${r.phase},${state[r.key].fte},${state[r.key].priority},"${names}"\n`;
+  });
+  csv+='\n\nWeek breakdown\nRoll-out,Resource,Stream,'+WEEKS.join(',')+',Avg\n';
+  rollouts.forEach(r=>{
+    const rd=weekData[r.key]||{};
+    Object.entries(rd).forEach(([name,vals])=>{
+      csv+=`${r.label},${name},${getStream(r.key,name)},${vals.map(v=>v!=null?v:'').join(',')},${avgWeeks(vals).toFixed(2)}\n`;
+    });
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='etm_allocation_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+
+/* ══ ROADMAP VIEW ══ */
+function renderRoadmap(){
+  const wrap = document.getElementById('roadmap-wrap');
+  if(!wrap) return;
+
+  // Collect all unique dates across all phases to build timeline
+  const allDates = new Set();
+  Object.values(roadmapData).forEach(phases=>{
+    phases.forEach(p=>{
+      if(p.start) allDates.add(p.start);
+      if(p.end)   allDates.add(p.end);
+    });
+  });
+
+  // Parse date strings like "26-Jan-2025" or "26-Jan"
+  function parsePhaseDate(s){
+    if(!s || s==='?') return null;
+    const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const parts = s.split('-');
+    if(parts.length===3) return new Date(parseInt(parts[2]), months[parts[1]], parseInt(parts[0]));
+    if(parts.length===2) return new Date(2026, months[parts[1]], parseInt(parts[0]));
+    return null;
+  }
+
+  // Get global min/max
+  let minDate = null, maxDate = null;
+  Object.values(roadmapData).forEach(phases=>{
+    phases.forEach(p=>{
+      const s=parsePhaseDate(p.start), e=parsePhaseDate(p.end);
+      if(s&&(!minDate||s<minDate)) minDate=s;
+      if(e&&(!maxDate||e>maxDate)) maxDate=e;
+    });
+  });
+  if(!minDate) return;
+  const totalDays = (maxDate - minDate)/(1000*60*60*24) + 14;
+
+  // Build month header
+  const months=[];
+  let cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  while(cur <= maxDate){
+    months.push(new Date(cur));
+    cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+  }
+
+  function pct(d){ return ((d-minDate)/(1000*60*60*24))/totalDays*100; }
+
+  let html = '<div style="min-width:900px;">';
+
+  // Month header
+  html += '<div style="display:flex;margin-left:140px;margin-bottom:6px;">';
+  months.forEach(m=>{
+    const startPct = Math.max(0, pct(m));
+    const endDate = new Date(m.getFullYear(), m.getMonth()+1, 0);
+    const widthPct = Math.min(100, pct(endDate)) - startPct;
+    if(widthPct<=0) return;
+    const mName = m.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+    html += `<div style="flex:0 0 ${widthPct}%;text-align:center;font-size:10px;color:var(--text3);font-weight:600;border-left:1px solid var(--border);padding:2px 0;">${mName}</div>`;
+  });
+  html += '</div>';
+
+  // Today line offset
+  const todayPct = pct(new Date());
+
+  // One row per rollout
+  rollouts.forEach(r=>{
+    const phases = roadmapData[r.key] || [];
+    if(!phases.length) return;
+
+    html += `<div style="display:flex;align-items:center;margin-bottom:8px;">`;
+    // Label
+    html += `<div style="flex:0 0 140px;font-size:12px;font-weight:600;color:var(--text);padding-right:10px;text-align:right;">${r.label}</div>`;
+    // Timeline bar
+    html += `<div style="flex:1;position:relative;height:32px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);">`;
+
+    // Today line
+    if(todayPct>0&&todayPct<100){
+      html += `<div style="position:absolute;left:${todayPct.toFixed(2)}%;top:0;bottom:0;width:2px;background:#ef4444;z-index:5;opacity:0.7;"></div>`;
+    }
+
+    phases.forEach((p,pi)=>{
+      const s = parsePhaseDate(p.start);
+      const e = parsePhaseDate(p.end || p.start);
+      if(!s||!e) return;
+      const left = Math.max(0, pct(s));
+      const right = Math.min(100, pct(new Date(e.getTime()+6*24*60*60*1000)));
+      const width = Math.max(0.5, right-left);
+      const color = PHASE_COLORS[p.phase] || '#94a3b8';
+      const lightColor = color+'33';
+      html += `<div
+        class="roadmap-phase"
+        data-rollout="${r.key}"
+        data-phase-idx="${pi}"
+        onclick="editPhase('${r.key}',${pi})"
+        title="${p.phase}: ${p.start} → ${p.end||p.start}"
+        style="position:absolute;left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;top:2px;bottom:2px;
+               background:${color};border-radius:3px;cursor:pointer;overflow:hidden;
+               display:flex;align-items:center;justify-content:center;transition:opacity .15s;">
+        <span style="font-size:9px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;">${p.phase}</span>
+      </div>`;
+    });
+
+    html += '</div></div>';
+  });
+
+  // Legend
+  const uniquePhases = [...new Set(Object.values(roadmapData).flatMap(ps=>ps.map(p=>p.phase)))];
+  html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">';
+  uniquePhases.forEach(ph=>{
+    const c = PHASE_COLORS[ph]||'#94a3b8';
+    html += `<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);">
+      <div style="width:12px;height:12px;border-radius:2px;background:${c};flex-shrink:0;"></div>${ph}
+    </div>`;
+  });
+  html += '</div>';
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function editPhase(rolloutKey, phaseIdx){
+  const phases = roadmapData[rolloutKey];
+  if(!phases) return;
+  const p = phases[phaseIdx];
+  const ro = rollouts.find(r=>r.key===rolloutKey);
+
+  const newStart = prompt(`Edit "${p.phase}" start date (e.g. 8-Jun):\nCurrent: ${p.start}`, p.start);
+  if(newStart===null) return;
+  const newEnd = prompt(`Edit "${p.phase}" end date:\nCurrent: ${p.end||p.start}`, p.end||p.start);
+  if(newEnd===null) return;
+  phases[phaseIdx].start = newStart.trim();
+  phases[phaseIdx].end = newEnd.trim();
+  renderRoadmap();
+}
+/* ══ END ROADMAP VIEW ══ */
+
+/* ══ COST VIEW ══ */
+const dailyRates={"Abhishek": 550, "Andrey": 550, "Ashok": 550, "Bayrem": 550, "Emilie": 550, "Idris": 550, "Imane": 550, "Ines": 550, "Jarek": 550, "Julien": 550, "Kalpikaa": 550, "Khadija": 550, "Khawla": 550, "Krishna": 550, "Kuldeep": 550, "Kumar G": 550, "Manish P": 550, "Manish S": 550, "Manos": 550, "Nejib": 550, "Nesrine": 550, "Rahul S": 550, "Sena": 550, "Shilpi": 550, "Siva": 550, "Syrine": 550, "Ullas": 550};  // name → rate in €/£/$
+
+function renderRateTable(){
+  const wrap=document.getElementById('rate-table');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  members.forEach(m=>{
+    if(dailyRates[m.name]===undefined) dailyRates[m.name]=0;
+    const c=avColor(m.name);
+    const div=document.createElement('div');
+    div.className='rate-inp-wrap';
+    div.innerHTML=`
+      <div class="res-avatar" style="background:${c.bg};color:${c.c};width:24px;height:24px;font-size:9px;flex-shrink:0;">${initials(m.name)}</div>
+      <span class="rate-inp-name" title="${m.name}">${m.name}</span>
+      <input class="rate-inp" type="number" min="0" step="50"
+        value="${dailyRates[m.name]||''}" placeholder="0"
+        oninput="dailyRates['${m.name}']=parseFloat(this.value)||0;renderCostView()">
+      <span style="font-size:10px;color:var(--text3);">/day</span>`;
+    wrap.appendChild(div);
+  });
+}
+
+function renderCostView(){
+  const months=parseFloat(document.getElementById('cost-months')?.value)||6;
+  const summary=document.getElementById('cost-summary');
+  if(!summary) return;
+
+  // cost per resource per roll-out = avg FTE × daily rate × 20 × months
+  let grandTotal=0;
+  const rolloutTotals={};
+  rollouts.forEach(r=>{ rolloutTotals[r.key]=0; });
+
+  // per-rollout breakdown
+  const cardsHtml=rollouts.map(r=>{
+    const rd=weekData[r.key]||{};
+    const names=Object.keys(rd).filter(n=>state[r.key].members.includes(getMember(n)?.id));
+    if(!names.length) return '';
+
+    let rollTotal=0;
+    const rows=names.map(name=>{
+      const avg=avgWeeks(rd[name]||[]);
+      const rate=dailyRates[name]||0;
+      const cost=avg*rate*20*months;
+      rollTotal+=cost;
+      const c=avColor(name);
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="res-avatar" style="background:${c.bg};color:${c.c};width:20px;height:20px;font-size:8px;flex-shrink:0;">${initials(name)}</div>
+            ${name}
+          </div>
+        </td>
+        <td>${avg>0?avg.toFixed(2):'—'}</td>
+        <td>${rate>0?'€'+rate.toLocaleString():'—'}</td>
+        <td>${months}</td>
+        <td style="color:${cost>0?'var(--blue)':'var(--text3)'};">${cost>0?'€'+Math.round(cost).toLocaleString():'—'}</td>
+      </tr>`;
+    }).join('');
+
+    grandTotal+=rollTotal;
+    rolloutTotals[r.key]=rollTotal;
+
+    return `<div class="cost-card">
+      <div class="cost-card-title">
+        <span>${r.label}</span>
+        <span class="cost-total-val">${rollTotal>0?'€'+Math.round(rollTotal).toLocaleString():'—'}</span>
+      </div>
+      <table class="ct">
+        <thead><tr>
+          <th>Resource</th><th>Avg FTE</th><th>Daily rate</th><th>Months</th><th>Cost</th>
+        </tr></thead>
+        <tbody>
+          ${rows}
+          <tr class="ct-total">
+            <td colspan="4">Total ${r.label}</td>
+            <td>${rollTotal>0?'€'+Math.round(rollTotal).toLocaleString():'—'}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+
+  summary.innerHTML=`
+    <div class="cost-grand">
+      <div>
+        <div class="cost-grand-label">Grand total — all roll-outs · ${months} month${months>1?'s':''}</div>
+        <div class="cost-grand-val">${grandTotal>0?'€'+Math.round(grandTotal).toLocaleString():'Set daily rates above to calculate'}</div>
+      </div>
+      <div style="opacity:.7;font-size:12px;text-align:right;">
+        Formula: FTE × daily rate × 20 days × months<br>
+        Based on avg weekly FTE per resource
+      </div>
+    </div>
+    ${cardsHtml}`;
+}
+
+function exportCostCSV(){
+  const months=parseFloat(document.getElementById('cost-months')?.value)||6;
+  let csv='Roll-out,Resource,Avg FTE,Daily Rate (€),Months,Cost (€)\n';
+  rollouts.forEach(r=>{
+    const rd=weekData[r.key]||{};
+    const names=Object.keys(rd).filter(n=>state[r.key].members.includes(getMember(n)?.id));
+    names.forEach(name=>{
+      const avg=avgWeeks(rd[name]||[]);
+      const rate=dailyRates[name]||0;
+      const cost=Math.round(avg*rate*20*months);
+      csv+=`${r.label},${name},${avg.toFixed(2)},${rate},${months},${cost}\n`;
+    });
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='etm_cost_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+/* ══ SETTINGS VIEW ══ */
+function renderSettings(){
+  renderCfgRollouts();
+  renderCfgResources();
+  renderCfgStreams();
+  // populate stream selects in settings (resources only)
+  ['cfg-res-stream'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=streams.map(s=>`<option value="${s}">${s}</option>`).join('');
+  });
+}
+
+function renderCfgRollouts(){
+  const el=document.getElementById('cfg-rollout-list');
+  if(!el) return;
+  if(!rollouts.length){ el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0;">No roll-outs yet.</div>'; return; }
+  el.innerHTML=rollouts.map(r=>{
+    const colour = r.colour||'#1a56db';
+    return `<div class="cfg-item">
+      <div style="width:28px;height:28px;border-radius:6px;background:${colour};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">${r.label.slice(0,2).toUpperCase()}</div>
+      <span class="cfg-item-label">${r.label}</span>
+      <span class="cfg-item-sub" style="color:var(--text3);">key: ${r.key}</span>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+        <label style="font-size:11px;color:var(--text3);">Colour</label>
+        <input type="color" value="${colour}"
+          oninput="rollouts.find(x=>x.key==='${r.key}').colour=this.value;renderCfgRollouts();renderCards();"
+          style="width:32px;height:24px;padding:0;border:1px solid var(--border2);border-radius:4px;cursor:pointer;">
+      </div>
+      <button class="cfg-del-btn" onclick="cfgDeleteRollout('${r.key}')">✕ Remove</button>
+    </div>`;
+  }).join('');
+}
+
+function renderCfgResources(){
+  const el=document.getElementById('cfg-resource-list');
+  if(!el) return;
+  if(!members.length){ el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0;">No resources yet.</div>'; return; }
+  el.innerHTML=members.map(m=>{
+    const c=avColor(m.name);
+    const stream=memberStreams[m.name]||'TM';
+    const rate=dailyRates[m.name]||0;
+    const rollCount=rollouts.filter(r=>state[r.key]&&state[r.key].members.includes(m.id)).length;
+    const safeName=m.name.replace(/'/g,"\\'");
+    const streamOpts=streams.map(s=>`<option value="${s}"${s===stream?' selected':''}>${s}</option>`).join('');
+    return `<div class="cfg-item" style="flex-wrap:wrap;gap:8px;">
+      <div class="res-avatar" style="background:${c.bg};color:${c.c};width:28px;height:28px;font-size:10px;flex-shrink:0;">${initials(m.name)}</div>
+      <span class="cfg-item-label" style="min-width:100px;">${m.name}</span>
+      <select class="cfg-sel" style="width:80px;" onchange="memberStreams['${safeName}']=this.value;renderCostView();">${streamOpts}</select>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span style="font-size:11px;color:var(--text3);">€</span>
+        <input type="number" min="0" step="50" value="${rate||''}" placeholder="0"
+          class="cfg-inp" style="width:90px;text-align:right;"
+          oninput="dailyRates['${safeName}']=parseFloat(this.value)||0;renderCostView();renderCfgResources();"
+          title="Daily rate for ${m.name}">
+        <span style="font-size:11px;color:var(--text3);">/day</span>
+      </div>
+      <span style="font-size:11px;color:var(--text3);margin-left:4px;">${rollCount} roll-out${rollCount!==1?'s':''}</span>
+      <button class="cfg-del-btn" style="margin-left:auto;" onclick="cfgDeleteResource('${m.id}')">✕ Remove</button>
+    </div>`;
+  }).join('');
+}
+
+function renderCfgStreams(){
+  const el=document.getElementById('cfg-stream-list');
+  if(!el) return;
+  el.innerHTML=streams.map(s=>`
+    <div class="cfg-item">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-right:4px;"></div>
+      <span class="cfg-item-label">${s}</span>
+      ${streams.length>1?`<button class="cfg-del-btn" onclick="cfgDeleteStream('${s}')">✕ Remove</button>`:''}
+    </div>`).join('');
+}
+
+function cfgAddRollout(){
+  const key=document.getElementById('cfg-ro-key').value.trim().toLowerCase().replace(/\s+/g,'_');
+  const label=document.getElementById('cfg-ro-label').value.trim();
+  const colour=document.getElementById('cfg-ro-colour').value||'#1a56db';
+  if(!key||!label) return;
+  if(rollouts.find(r=>r.key===key)){ alert('Roll-out key already exists'); return; }
+  rollouts.push({key,label,stream:'TM',colour});
+  weekData[key]={};
+  state[key]={fte:0,priority:'medium',members:[]};
+  document.getElementById('cfg-ro-key').value='';
+  document.getElementById('cfg-ro-label').value='';
+  populateFilters();
+  renderSettings();
+  renderCards();
+  renderWeekView();
+  renderRoadmap();
+}
+
+function cfgDeleteRollout(key){
+  if(!confirm(`Remove roll-out "${key}" and all its data?`)) return;
+  const idx=rollouts.findIndex(r=>r.key===key);
+  if(idx>=0) rollouts.splice(idx,1);
+  delete weekData[key];
+  delete state[key];
+  populateFilters();
+  renderSettings();
+  renderCards();
+  renderWeekView();
+}
+
+function cfgAddResource(){
+  const name=document.getElementById('cfg-res-name').value.trim();
+  const stream=document.getElementById('cfg-res-stream').value;
+  const rate=parseFloat(document.getElementById('cfg-res-rate').value)||0;
+  if(!name) return;
+  if(members.find(m=>m.name===name)){ alert('Resource already exists'); return; }
+  const id='m'+Date.now();
+  members.push({name,id});
+  memberStreams[name]=stream;
+  dailyRates[name]=rate;
+  document.getElementById('cfg-res-name').value='';
+  document.getElementById('cfg-res-rate') && (document.getElementById('cfg-res-rate').value='');
+  populateFilters();
+  renderSettings();
+  renderRoster();
+  renderCards();
+  update(true);
+  document.getElementById('cfg-res-rate').value='';
+  populateFilters();
+  renderSettings();
+  renderRoster();
+  renderCards();
+}
+
+function cfgDeleteResource(id){
+  const m=members.find(x=>x.id===id);
+  if(!m) return;
+  if(!confirm(`Remove "${m.name}" from the team?`)) return;
+  members=members.filter(x=>x.id!==id);
+  rollouts.forEach(r=>{
+    if(state[r.key]) state[r.key].members=state[r.key].members.filter(mid=>mid!==id);
+    if(weekData[r.key]) delete weekData[r.key][m.name];
+  });
+  delete memberStreams[m.name];
+  delete dailyRates[m.name];
+  populateFilters();
+  renderSettings();
+  renderRoster();
+  renderCards();
+  renderWeekView();
+}
+
+function cfgAddStream(){
+  const name=document.getElementById('cfg-stream-name').value.trim().toUpperCase();
+  if(!name||streams.includes(name)) return;
+  streams.push(name);
+  document.getElementById('cfg-stream-name').value='';
+  populateStreamSelects();
+  renderSettings();
+}
+
+function cfgDeleteStream(s){
+  if(streams.length<=1){ alert('Must keep at least one stream'); return; }
+  streams=streams.filter(x=>x!==s);
+  populateStreamSelects();
+  renderSettings();
+}
+/* ══ END SETTINGS VIEW ══ */
+
+
+/* init */
+/* Set Sanofi logo src */
+document.getElementById('sanofi-logo').src='data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABWAN4DASIAAhEBAxEB/8QAHAABAAMBAQEBAQAAAAAAAAAAAAYHCAUEAQMJ/8QARRAAAQMEAQIEAgUHBg8AAAAAAQACAwQFBhEHEiEIEzFBUWEUIjJCcQlSdYGhsbM3OHJ0kdQVFyMzNTZTYoSSlLLBw9H/xAAZAQEAAwEBAAAAAAAAAAAAAAAAAQIDBAX/xAAmEQEBAQACAQQBAwUAAAAAAAAAAQIDESEEEjFRQRMUYXGBwdHw/9oADAMBAAIRAxEAPwDZaIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgL49zWNL3uDWtGySdABc7KL5bMax6uv15qW01BQwumnkPs0ewHuT6Ae5ICp2y41lPM725Dns1dZMNlPXbcaglMUlVF92Src3RPUO4YP2e+uOP3T3avUWk781O7xy9xva651BNltBUVbTp0FF1VUjT8CIg4g/ivN/jn48YOqpu1bRs/2lVaqqFg/FzowAvXlAtXF3Gl2u+J4rb2stlMZxR07W07Xga6i5wafQbcSdk6UG4uzPkZmeQ45mdusdXT3+WqraWaguonNFExjSWFujuPZaB3Hd61zxY1m6k+P5n+kzMs7W3jeSY9ktJ9Lx+9266wD1fSVDZQ35HpPY/Irqqvs24jxbIKo3e2slxrImbMN4tB8idrv98N0JB8Q4HY9wvBxtmuQUeUv455HZAzI2ROmttxgZ0U94gb6vYPuyt+8z9Y7LO8c1O8X+3/fKOpfMWgiIsVRERAREQEWevGpzJe+McdtdpxZ7Ke83kyH6W5gf9HhZ0gloPbqJcACd60fkqQoOP/FrV2Wny+iyi9zmphbVxU7cgPmOa4dQ/wAmXdGyCPq/sQb0RUp4Z8l5Jfxddr3zE2SkdbpZDFJVUvkVHkRM3I+RoABGwdHWzo+vZZ2reV+deec6rrVxjLV2e00+3MhpZmweVFvTXzTHv1O16A6+A7EoN6Iv545ZnviP4Syeit2T5TUzPqIhNFHVTsrYZow7pPc7I7jXqCtHeMnk/LePeNrFccTq4aGtulWIpZzC2QsZ5RcQ0OBAO9dyCg0AiwNYsc8WWXYnTZrbcpvE9JVQ/SaaNl5EckrO5BbGCB312B0rR8FHOGVZterjg2bVH02vpKY1NLWPjDJS1rg18cgAAJHUCDrfY732QaoRY78S/PGdV3J54p4ndLBVxTiknqadgdUVFQfWNhPZjW+hd67B7gDvB8nuPil4UjpcnyK+V9XbZJgyT6RWNrqfqP3JASSzfcbGvkUG7sgutFYrFX3q4y+VR0FPJUzv/NYxpc4/2BYxtvOniK5Xv1yn4qsNPT2uhcNwthgcWNO+kSSTEAvIB7N1+HuriybkSj5M8HOTZbQxfRZZ7NUw1dOHb8mZrdPZv3HfY+Tgsq+G3FucL/j91n4qyE2uhiqmsrGCuEHXL0bB1o77INV8v3jnK2Yjhjsco5JbrLTNN8dQ0jJiKnpZthbpwazZf3Hbt6q7rK+uks1FJc42RV7qeN1Sxn2Wylo6wPkDtY78ZXIPJeB1eDWy3ZZXW6sfZGvuRpZAGzVLSGveTrv3B/8Ai2NapHzWuklkd1PfCxzj8SWgldXL6mb4McUxJc9+Z83v7/o01uXMz18PSiIuVmrLk23jMuRsYwmoHXaKNrr7doz9mYRuDKeJ3xaZC5xHv5as0dhoKH2JrX8uZRK4bkjtdujYT7NLqknX6/3KYLTkviZ+v8+Vr9Kw8UWO1mScN3ant8cL6ij1XN86d0bA2Lbn76Qer6vV9U9idLK3hgxquyLmCyFtPafo9BAy7zmCR0MjI+oBrdtaCXB2ttPYgnuVsfnCqFFw3mNSTrostVr8TE4D9pWY/B68UXM1tpxIHCrw1rjqRjtEStOvqvdr09D0n4tHv6Hpd2em30147fZWzVAucsZnv2FvuNqHRkNhkF0s8zftNni+t5f9F7QWEe+x8FPUcA4EEAg9iCvNxq41NRjL1e3Pxm7U9+xy23ul/wAxcKSKpj7+jXtDh+9dBQngvQ4osbG/YjjkjZ/QbK8N/YApsm57dWFnVERFVAiIgozxbcZ4vyTZbRSXDKbdjuQU8jxapayVrWT9WuqItJBIJDe42QfY70s6VUPie4Atwm+lVVVjdH2217a6iYzfwP14m/qb6rVPNPC1t5Mv9ru9Xequ3voo/JkZFGHiWPqLtDZHS7ZPfv7duysLIbPFd8WuNgdJ5cVbRSUhe5of0h7Czej663vXuurm4+DPFx64926vfunXx9efyvqYmZZfP5UDinK8nO3hvzqlpqBtFk1JaZ4amlhcXMkLonFj4/fTulw6e5BGtnYKrX8nZmeMWV2TY5d7jS265V8sE9M6olEYnaxrgWAk66hvevfqPwV9eHPgm3cNy3melv1TeJro2JjjLAIhG2PqOgATvZd+xQflfwf4lld+qb3jV7nxmaqeZJqYUwnp+snZLG9TSzZ9tkfAD0XKoqX8ojdLZceR8ZZb7hSVjoLa5swgma/yyZSQHaPY6+Knv5RD+SbDP0h/6Cv0xLwTY1RV0VRkmZXC6xMcHGClpW0wf8i4uedfho/NXD4g+HaHl3GbXY57zPZ2W6p8+N8UAl6vqFnSQSPj67Qevwx/zf8ACP0RD+5ZR8FX86zI/wCrXD+OxbU44xiLDMEs2KwVb6uO10jKZs72Bpk6R6kD0/BVfw74ebdxzyjcs5psmqrhJWxzs+iyUzWNYJZA/wC0HHeta9AgzRhFzoeOvHLc6rMZG0tObxXNNTN2bEKgPMUhJ9GkPb39AHb9FoPxq53iMPAt2s7bxbq2vu/kx0UEFQyRztSseZNNPZoDT39NkD3Um574AxDlqSK41ss9pvkMflMuFK0EvYPRsjD2eB313BHx12VS4r4I7JSXaOoyTNqu6UTHAmmpaIUxkHwLy9xAPyG/mg4nB1sraLwG5/V1TXthrxWzUwd7sEbGFw+Rc1w/UpL+TZ/k+yr9Ks/hBaDynBbTd+La/j23tbaLXUW51BCKeMEU7C3Q00+uvn6qNeHfh+k4dx+52mkvc92FfVCodJLAIujTA3QAJ+CDM/5Sf/X3FP0XJ/FK27ZP9DUP9Xj/AO0KoPET4f6DmK92q6VeSVNodb6d1P0RUzZQ8F3Vvu4aKuWkhFNSQ07SXCKNrAT76GkH6oiIKj5Tyx/HHJVtyKW01lyt1+oDbJGUz42uZUwvdLESZHNaAWPmHc/dXnZz3Qn1wq+j/jKD+8KcctYPbeRMFr8XuZ8sTgPp5w3Zgmb3Y8D30exHuCR7rI+R3CTF7tJi+XYNxli9bSMYxlVJi8lZJcvbzYQ1vQQdeh1onXZeh6fj4+bPVnmNsSaixPEJzVSXfiC/2enxm60cldCyATzVNG5jep7d7EcznHsCOw91VeFZdTYRyzx7fA+K7wjGmUksFDc4p3t6mSAMcXNjETgS0ljiSNfaK7Vvo7m+MVNNYL3HCfSeDCrXaID+D6jq/tXyWeZ0ogmqWFxPeJ12x0v/AOXyv/K7cYxjNxJ48/lpJJOl7Rc+2+Qbbhd9/wCsoP7wufk/iFpqKw1c1Ph17ZVOjMVKXVNG8GZ/1YwWsnc4gvLfQFUpdam3Y66Gpvtls9HBOemCbIcHpKilmd66FVRO7n8Gn4qwOB8EfnmTWnkK94JjmK2a0dT7ZT2yh8g3Kffaod1AO8tugWg+p7rn1wcOJ77PClxmTutBceWV+O4JY7HKQZqKhiimI+9IGjrP63bK7yIvLttvdYCIigEREBERAREQEREBERAREQEREBERAREQFxMyxPHMwtRtmS2iluVNvbRK360bvzmOH1mn5ggrtoplsvcPhn+++F7HKq/NvFuyO5+Yz0p7uxtygHy1IQSPxJXrr+Bay4UH+Dqi7YdTUhHSfoeF0zJAPk5znaPz0r1Rb/u+b7X/AFNKa478N3HGIvhqJ6arv9TE/wAxhucgfEx/5zYgAzf4glXI0BrQ1oAAGgB7L6iy5OXfJe93tW6uvkREVECIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP//Z';
+
+document.getElementById('last-updated').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+// Restore previous session if available
+autoRestore();
+populateFilters();
+populateStreamSelects();
+renderRoster();
+renderCards();
+update(true);
+// pre-render week view so it's ready on first tab click
+renderWeekView();
+</script>
+</body>
+</html>
